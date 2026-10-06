@@ -7,6 +7,6 @@ chaque brouillon explore une façon de présenter le fonds photographique.
 
 ## experiments
 
-- [les feuilles →](experiments/feuilles/) — 50 photos tombent comme des
+- [les feuilles →](experiments/feuilles/) 50 photos tombent comme des
   feuilles de papier et s'accumulent à l'écran ; on peut les saisir et les
   déplacer à la souris.
