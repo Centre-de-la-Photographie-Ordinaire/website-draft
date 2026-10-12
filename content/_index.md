@@ -8,6 +8,7 @@ title: brouillons
 - [**diaporama** →](experiments/diaporama/) : une photo apparaît toutes les secondes, dans un ordre tiré au hasard à chaque visite ; un clic met le diaporama en pause, un second clic le relance.
 - [**les feuilles** →](experiments/feuilles/) : 50 photos tombent comme des feuilles de papier et s'accumulent à l'écran ; on peut les saisir et les déplacer à la souris. *(piste écartée : l'accumulation manque de clarté, mais l'expérience reste consultable.)*
 - [**font-dindong** →](experiments/font-dindong/) : variations de la fonte DINdong — casse, accents pivotés, ligatures inclusives au point médiant, jeux stylistiques ss01–ss08, chiffres/ponctuation mélangés, éléments gardés de la fonte d'origine.
+- [**font-spectral** →](experiments/font-spectral/) : variations de la fonte Spectral (corps de texte de la charte) — la famille complète, sept graisses (ExtraLight → ExtraBold) et leurs italiques, auto-hébergée.
 
 ## pages du site
 
