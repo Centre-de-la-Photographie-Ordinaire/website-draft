@@ -2,3 +2,7 @@ public/
 resources/_gen/
 .DS_Store
 .hugo_build.lock
+
+# sources de polices (dindong + spectral) — volumineuses, non versionnées ;
+# les polices servies au navigateur sont copiées dans static/ (voir static/experiments/font-dindong)
+fonts/
