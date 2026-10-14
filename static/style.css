@@ -47,7 +47,6 @@ body {
   letter-spacing: 0.02em;
   line-height: 1.15;
 }
-.site-lieu { margin-top: 0.1rem; font-size: 0.9rem; color: var(--dim); }
 .menu-wrap { flex-shrink: 0; }
 .menu-toggle {
   display: flex;
@@ -100,15 +99,6 @@ body {
   border-bottom: 1px solid transparent;
 }
 .nav a:hover { color: var(--accent); }
-.barre-separation {
-  height: 1.5px;
-  background: var(--ink);
-  opacity: 0.55;
-  width: 100%;
-  max-width: 70rem;
-  margin: 0 auto;
-}
-
 /* ===== corps de page ===== */
 .main {
   flex: 1;
@@ -117,14 +107,6 @@ body {
   margin: 0 auto;
   padding: 2.5rem 1.5rem 4rem;
   line-height: 1.7;
-}
-.page-titre {
-  font-family: var(--font-titre);
-  font-size: clamp(1.5rem, 4vw, 2.2rem);
-  font-weight: 700;
-  letter-spacing: 0.55em;
-  text-transform: lowercase;
-  margin-bottom: 1.6em;
 }
 .main p { margin-bottom: 1.1em; }
 .main h2 {
@@ -315,4 +297,347 @@ body {
   font-size: 0.78rem;
   letter-spacing: 0.25em;
   color: var(--dim);
+}
+
+/* ===== page 1 — objet (ex-esprit) : nouveau layout design PDF page 4 ===== */
+.objet-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.2fr);
+  gap: 2.5rem;
+  align-items: start;
+  margin-bottom: 2rem;
+}
+.objet-col-texte { display: flex; flex-direction: column; gap: 1.1rem; line-height: 1.7; }
+.objet-col-texte p { margin: 0; }
+.objet-contenu-actif {
+  margin-top: 1.2rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(245, 239, 228, 0.14);
+}
+.objet-contenu-actif h2 {
+  font-family: var(--font-titre);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: lowercase;
+  margin: 0 0 0.8em;
+  color: var(--accent);
+}
+.objet-contenu-actif blockquote {
+  border-left: 2px solid var(--accent);
+  margin: 0.9rem 0;
+  padding-left: 1rem;
+  color: var(--dim);
+  font-style: italic;
+}
+.objet-col-image { margin: 0; }
+.objet-image-principale { margin: 0; }
+.objet-image-principale img { width: 100%; height: auto; display: block; }
+
+/* bottom bar — 3 boutons avec cercle jaune */
+.objet-bottom-bar {
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+  padding: 1.5rem 0 0.5rem;
+  border-top: 1px solid rgba(245, 239, 228, 0.14);
+  margin-top: 1rem;
+}
+.objet-tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  color: var(--dim);
+  font-family: var(--font-titre);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
+  transition: color 0.2s;
+}
+.objet-btn-cercle {
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: transparent;
+  transition: background 0.2s, transform 0.2s;
+}
+.objet-tab-btn:hover { color: var(--ink); }
+.objet-tab-btn:hover .objet-btn-cercle { background: rgba(250, 182, 23, 0.15); transform: scale(1.05); }
+.objet-tab-btn.active { color: var(--accent); }
+.objet-tab-btn.active .objet-btn-cercle {
+  background: var(--accent);
+  box-shadow: 0 0 12px rgba(250, 182, 23, 0.4);
+}
+.objet-btn-label { font-size: 0.85rem; letter-spacing: 0.12em; font-weight: 500; }
+
+@media (max-width: 700px) {
+  .objet-layout { grid-template-columns: 1fr; gap: 1.4rem; }
+  .objet-col-image { order: -1; }
+  .objet-bottom-bar {
+    position: sticky;
+    bottom: 0;
+    gap: 1.2rem;
+    padding: 1rem 0.5rem;
+    background: var(--bg);
+    border-top: 1px solid rgba(245, 239, 228, 0.2);
+    margin-top: 0;
+  }
+  .objet-btn-cercle { width: 38px; height: 38px; }
+}
+
+/* ===== page 2 — missions : cards avec cadre ===== */
+.missions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+.mission-card {
+  border: 2px solid rgba(250, 182, 23, 0.35);
+  padding: 1.4rem;
+  background: rgba(20, 23, 26, 0.25);
+  transition: border-color 0.2s;
+}
+.mission-card:hover { border-color: var(--accent); }
+.mission-card h3 {
+  font-family: var(--font-titre);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
+  margin: 0 0 0.7em;
+  color: var(--accent);
+}
+.mission-card p {
+  margin: 0;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+/* ===== page 3 — agenda : images en ligne, contenu au clic ===== */
+.agenda-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.agenda-item {
+  flex: 0 0 auto;
+  border: none;
+  padding: 0;
+  width: 160px;
+}
+.agenda-item summary {
+  list-style: none;
+  cursor: pointer;
+}
+.agenda-item summary::-webkit-details-marker { display: none; }
+.agenda-image-frame {
+  display: block;
+  width: 160px;
+  height: 160px;
+  overflow: hidden;
+  border: 3px solid rgba(250, 182, 23, 0.35);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.agenda-image-frame:hover,
+.agenda-item[open] .agenda-image-frame {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(250, 182, 23, 0.4);
+}
+.agenda-image-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.agenda-info, .agenda-titre, .agenda-meta { display: none; }
+.agenda-contenu {
+  display: block;
+  width: 320px;
+  padding: 0.8rem 0;
+  line-height: 1.7;
+  font-size: 0.92rem;
+}
+.agenda-contenu p { margin: 0 0 0.6rem; }
+
+@media (max-width: 600px) {
+  .agenda-item { width: 120px; }
+  .agenda-image-frame { width: 120px; height: 120px; }
+  .agenda-contenu { width: 240px; }
+}
+
+/* ===== page 4 — collection : accordéon mono-ouvert ===== */
+.collection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 1.5rem 0;
+}
+.collection-item {
+  border-bottom: 1px solid rgba(245, 239, 228, 0.1);
+}
+.collection-item summary {
+  font-family: var(--font-titre);
+  font-size: 1.02rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  padding: 0.7rem 0.5rem;
+  cursor: pointer;
+  list-style: none;
+  transition: color 0.15s;
+}
+.collection-item summary::-webkit-details-marker { display: none; }
+.collection-item summary:hover { background: rgba(250, 182, 23, 0.05); }
+.collection-item[open] summary { color: var(--accent); }
+.collection-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.6rem;
+  padding: 0.6rem 0.5rem 1rem;
+}
+.collection-images img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border: 2px solid rgba(250, 182, 23, 0.3);
+  transition: border-color 0.2s;
+}
+.collection-images img:hover { border-color: var(--accent); }
+
+/* accordéon JS : collection — fermer l'item ouvert avant d'en ouvrir un autre */
+
+/* ===== page 5 — expositions : nouveau layout 50/50 (PDF pages 9-10) ===== */
+.expo-grid-50 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  align-items: start;
+  margin-top: 1.5rem;
+}
+.expo-col-gauche {
+  min-width: 0;
+  position: sticky;
+  top: 1rem;
+}
+.expo-image-large {
+  display: none;
+  margin: 0;
+}
+.expo-image-large.active { display: block; }
+.expo-image-large img {
+  width: 100%;
+  max-height: 55vh;
+  object-fit: contain;
+  background: var(--ardoise);
+  display: block;
+}
+.expo-image-large figcaption {
+  margin-top: 0.5rem;
+  color: var(--dim);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+.expo-col-droite {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+.expo-col-droite ol { list-style: none; margin: 0; padding: 0; }
+.expo-col-droite li { border-bottom: 1px solid rgba(245, 239, 228, 0.12); }
+.expo-col-droite li:first-child { border-top: 1px solid rgba(245, 239, 228, 0.12); }
+.expo-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0.75rem 0.3rem;
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.expo-item:hover { background: rgba(250, 182, 23, 0.07); }
+.expo-nom { display: block; font-family: var(--font-titre); letter-spacing: 0.04em; }
+.expo-item.active .expo-nom { color: var(--accent); }
+.expo-meta { color: var(--dim); font-size: 0.8rem; white-space: nowrap; }
+.expo-detail { display: none; padding: 0.5rem 0.3rem 0.8rem; line-height: 1.6; }
+.expo-detail.active { display: block; }
+.expo-detail p { margin: 0; font-size: 0.92rem; }
+
+@media (max-width: 700px) {
+  .expo-grid-50 { grid-template-columns: 1fr; gap: 1rem; }
+  .expo-col-gauche { order: -1; }
+  .expo-meta { white-space: normal; }
+}
+
+/* ===== page 6 — collecte ===== */
+.collecte-content { max-width: 40rem; }
+.collecte-content h2 {
+  font-family: var(--font-titre);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: lowercase;
+  margin: 1.5em 0 0.8em;
+  color: var(--accent);
+}
+
+/* ===== page 7 — soutien ===== */
+.soutien-content { max-width: 40rem; }
+.soutien-content ul { list-style: none; padding: 0; margin: 0 0 1.5em; }
+.soutien-content li {
+  margin: 0.8em 0;
+  padding-bottom: 0.8em;
+  border-bottom: 1px solid rgba(245, 239, 228, 0.1);
+  line-height: 1.6;
+}
+.soutien-content li:last-child { border-bottom: none; }
+
+/* ===== page 8 — fabrique : accordéon mono-ouvert ===== */
+.fabrique-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 1.5rem 0;
+}
+.fabrique-item {
+  border-bottom: 1px solid rgba(245, 239, 228, 0.1);
+}
+.fabrique-item summary {
+  font-family: var(--font-titre);
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 0.75rem 0.5rem;
+  cursor: pointer;
+  list-style: none;
+  transition: color 0.15s;
+}
+.fabrique-item summary::-webkit-details-marker { display: none; }
+.fabrique-item summary:hover { background: rgba(250, 182, 23, 0.05); }
+.fabrique-item[open] summary { color: var(--accent); }
+.fabrique-contenu { padding: 0.5rem 0.5rem 1rem; line-height: 1.7; }
+.fabrique-contenu p { margin: 0 0 0.6rem; }
+.fabrique-contenu ul { list-style: none; padding: 0; margin: 0.5em 0; }
+.fabrique-contenu li { margin: 0.5em 0; padding-left: 0.5rem; border-left: 2px solid rgba(250, 182, 23, 0.3); }
+
+/* ===== responsive : menu nav plus long ===== */
+.nav {
+  min-width: 14rem;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.nav a {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.7rem;
 }

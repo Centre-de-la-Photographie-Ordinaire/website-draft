@@ -1,10 +1,17 @@
 {{ define "main" }}
 <main class="main main-large">
-<h1 class="page-titre">{{ .Title }}</h1>
 {{ .Content }}
 {{ with .Params.expos }}
-<div class="md-grid">
-  <nav class="md-liste" aria-label="liste des expositions">
+<div class="expo-grid-50">
+  <div class="expo-col-gauche">
+    {{ range $i, $e := . }}
+    <figure class="expo-image-large{{ if eq $i 0 }} active{{ end }}" data-expo-image="expo-{{ $i }}">
+      {{ with $e.image }}<img src="{{ . }}" alt="{{ $e.nom }}"{{ if eq $i 0 }} loading="eager"{{ else }} loading="lazy"{{ end }} />{{ end }}
+      <figcaption>{{ $e.date }} · {{ $e.lieu }}</figcaption>
+    </figure>
+    {{ end }}
+  </div>
+  <nav class="expo-col-droite" aria-label="liste des expositions">
     <ol>
       {{ range $i, $e := . }}
       <li>
@@ -12,38 +19,38 @@
           <span class="expo-nom">{{ $e.nom }}</span>
           <span class="expo-meta">{{ $e.date }} · {{ $e.lieu }}</span>
         </button>
+        <div class="expo-detail" id="expo-{{ $i }}">
+          {{ with $e.texte }}<p>{{ . }}</p>{{ end }}
+        </div>
       </li>
       {{ end }}
     </ol>
   </nav>
-  <div class="md-contenu">
-    {{ range $i, $e := . }}
-    <section class="expo-detail{{ if eq $i 0 }} active{{ end }}" id="expo-{{ $i }}">
-      {{ with $e.image }}
-      <img src="{{ . }}" alt="{{ $e.nom }} (visuel)" loading="lazy" />
-      {{ end }}
-      <p class="expo-meta">{{ $e.date }} · {{ $e.lieu }}</p>
-      {{ with $e.texte }}
-      <p>{{ . }}</p>
-      {{ end }}
-    </section>
-    {{ end }}
-  </div>
 </div>
+
 <script>
-/* master-detail — liste (col-4 gauche) + contenu de l'exposition sélectionnée (col-8 droite),
-   d'après le principe de romapublications.org (pas de lightbox plein écran) */
+/* Expositions — col-6 image/legend + col-6 list with detail under each item (PDF pages 9-10) */
 (function () {
   var items = Array.prototype.slice.call(document.querySelectorAll('.expo-item'));
-  var panels = Array.prototype.slice.call(document.querySelectorAll('.expo-detail'));
-  if (!items.length) return;
+  var images = Array.prototype.slice.call(document.querySelectorAll('.expo-image-large'));
+  if (!items.length || !images.length) return;
+
   items.forEach(function (btn) {
     btn.addEventListener('click', function () {
+      var targetId = btn.dataset.expo;
+
       items.forEach(function (b) { b.classList.remove('active'); });
-      panels.forEach(function (p) { p.classList.remove('active'); });
       btn.classList.add('active');
-      var target = document.getElementById(btn.dataset.expo);
-      if (target) target.classList.add('active');
+      var detail = document.getElementById(targetId);
+      if (detail) {
+        var allDetails = Array.prototype.slice.call(document.querySelectorAll('.expo-detail'));
+        allDetails.forEach(function (d) { d.classList.remove('active'); });
+        detail.classList.toggle('active');
+      }
+
+      images.forEach(function (img) { img.classList.remove('active'); });
+      var activeImg = document.querySelector('.expo-image-large[data-expo-image="' + targetId + '"]');
+      if (activeImg) activeImg.classList.add('active');
     });
   });
 })();

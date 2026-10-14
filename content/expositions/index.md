@@ -1,5 +1,5 @@
 ---
-title: expositions
+title: Expositions
 expos:
   - nom: "LUSSAN MILLE PHOTOS"
     date: "2016"
@@ -118,4 +118,4 @@ expos:
     texte: "visuel provisoire : image issue de la collection (bead org-jxaa)"
 ---
 
-<p class="provisoire">liste des expositions importée de <code>expositions.txt</code> (2016 → 2026). Les visuels sont provisoires : images issues de la collection, à remplacer par les visuels réels des expositions (bead org-jxaa). Sélectionner une exposition dans la liste de gauche affiche son contenu dans la colonne de droite.</p>
+<p class="provisoire">liste des expositions importée de <code>expositions.txt</code> (2016 → 2026). Les visuels sont provisoires : images issues de la collection, à remplacer par les visuels réels des expositions (bead org-jxaa).</p>

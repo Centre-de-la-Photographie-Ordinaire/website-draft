@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="{{ "style.css" | relURL }}" />
 </head>
 <body>
-{{ partial "header.html" }}
+{{ partial "header.html" . }}
 {{ block "main" . }}{{ end }}
 <footer class="site-footer">
   <span>centre de la photographie ordinaire · brouillons</span>
@@ -44,15 +44,21 @@
     if (e.key === 'Escape') close();
   });
 })();
-/* accordéon (.acc-item) : un seul panneau ouvert à la fois */
+/* accordéon (.acc-item / .collection-item / .fabrique-item) : un seul panneau ouvert à la fois */
 (function () {
-  var items = Array.prototype.slice.call(document.querySelectorAll('.acc-item'));
-  if (!items.length) return;
-  items.forEach(function (d) {
-    d.addEventListener('toggle', function () {
-      if (d.open) items.forEach(function (o) { if (o !== d) o.open = false; });
+  function makeAccordion(sel) {
+    var items = Array.prototype.slice.call(document.querySelectorAll(sel));
+    if (!items.length) return;
+    items.forEach(function (d) {
+      d.addEventListener('toggle', function () {
+        if (d.open) items.forEach(function (o) { if (o !== d) o.open = false; });
+      });
     });
-  });
+  }
+  makeAccordion('.acc-item');
+  makeAccordion('.agenda-item');
+  makeAccordion('.collection-item');
+  makeAccordion('.fabrique-item');
 })();
 </script>
 </body>
