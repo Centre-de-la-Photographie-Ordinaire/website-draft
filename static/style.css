@@ -611,3 +611,29 @@ body {
   font-size: 0.85rem;
   padding: 0.4rem 0.7rem;
 }
+
+/* === design-fidelity override (auto-generated) === */
+/* To achieve the horizontal card layout, the container must be a flex row with gaps between cards. */
+.missions-jaune {
+  display: flex;
+  flex-direction: row;
+  gap: 1.6rem;
+  margin: 0 0 1.5rem;
+  padding: 0;
+}
+/* Each card must be a distinct, opaque block with a thin yellow border, and the layout must be a horizontal row. */
+.mission-pave {
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
+  padding: 1.3rem 1.6rem 1.2rem;
+  margin: 0;
+  width: 270px;
+  height: 480px;
+  border: 1px solid var(--accent);
+}
+/* The large yellow rectangle behind the cards is not part of the design; it must be removed. */
+.missions-jaune::before {
+  content: none;
+}
+/* === end design-fidelity override === */
