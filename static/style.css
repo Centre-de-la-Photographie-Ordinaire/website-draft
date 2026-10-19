@@ -637,3 +637,109 @@ body {
   content: none;
 }
 /* === end design-fidelity override === */
+
+/* === design-fidelity override (auto-generated) === */
+/* A+B+C (org-4zy7.6, operator spec):
+   A. thin outline on 3 sides + a THICK bar on one side, offset to overhang a corner
+   B. text stays inside the frame: each card collapses to a summary, click to expand
+   C. the row spans the full container width (reset the original 50rem cap) */
+
+.missions-jaune {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2.2rem;              /* room for the overhanging bars between cards */
+  max-width: none;          /* C: undo .missions-jaune { max-width: 50rem } */
+  width: 100%;
+  align-items: stretch;    /* all four frames the same height, as in the design */
+  grid-auto-rows: 1fr;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  position: relative;
+}
+.missions-jaune::before { content: none; }   /* the old shared yellow rectangle */
+
+.mission-pave {
+  position: relative;
+  z-index: 1;
+  background: #000;          /* design uses a near-black card interior */
+  margin: 0;
+  padding: 1.2rem 1.4rem 1.1rem;
+  min-width: 0;              /* let text wrap inside the grid track */
+  align-self: stretch;
+  /* Portrait proportion when collapsed; grows with the row when a card is
+     expanded so the list can never spill outside the frame. */
+  min-height: 20rem;
+  height: auto;
+  overflow: visible;
+  border-top: 1px solid var(--accent);
+  border-bottom: 1px solid var(--accent);
+  border-left: 1px solid var(--accent);
+  border-right: 1px solid var(--accent);
+}
+
+/* --- A: the THICK accent bar ------------------------------------------------
+   One ::after per card, offset vertically so it overhangs a corner. Cards 1-3
+   carry it on the right (card 1 top-aligned, 2-3 bottom-aligned); card 4 on
+   the left. Width comes from the measured design (~11-17px). */
+.mission-pave::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -0.5rem;            /* sits just outside the thin outline */
+  width: 0.5rem;
+  background: var(--accent);
+  z-index: -1;
+}
+/* Card 1: bar overhangs the TOP-RIGHT corner (starts above, ends above the base). */
+.mission-pave:nth-child(1)::after { top: -1rem; bottom: 10%; }
+/* Cards 2-3: bar overhangs the BOTTOM-RIGHT corner. */
+.mission-pave:nth-child(2)::after,
+.mission-pave:nth-child(3)::after { top: 10%; bottom: -1rem; }
+/* Card 4: mirrored to the LEFT. */
+.mission-pave:nth-child(4)::after {
+  left: -0.5rem; right: auto;
+  top: 10%; bottom: -1rem;
+}
+
+/* --- B: keep the text inside the frame ------------------------------------- */
+.mission-pave h3 {
+  font-family: var(--font-titre);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.8em;
+  color: var(--ink);
+}
+/* The list becomes a collapsible disclosure: the card shows a teaser and the
+   reader clicks the summary to expand. Native <details>, no JS. */
+.mission-pave details { margin: 0; }
+.mission-pave details > summary {
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-titre);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  padding: 0.35rem 0;
+  border-top: 1px solid rgba(245, 239, 228, 0.25);
+}
+.mission-pave details > summary::-webkit-details-marker { display: none; }
+.mission-pave details > summary::after { content: " +"; color: var(--accent); }
+.mission-pave details[open] > summary::after { content: " –"; }
+.mission-pave details ul {
+  margin: 0.6rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+.mission-pave li { line-height: 1.5; font-size: 0.92rem; }
+.mission-pave li::marker { color: var(--accent); }
+
+@media (max-width: 900px) {
+  .missions-jaune { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .missions-jaune { grid-template-columns: minmax(0, 1fr); }
+}
+/* === end design-fidelity override === */
