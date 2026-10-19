@@ -11,7 +11,7 @@ sansTitre: true
 
 <p class="objet-liens">
 <button type="button" class="objet-lien" data-panneau="panneau-interview" aria-expanded="false" aria-controls="panneau-interview">interview</button>
-<button type="button" class="objet-lien" data-panneau="panneau-collection" aria-expanded="false" aria-controls="panneau-collection">la collection</button>
+<button type="button" class="objet-lien active" data-panneau="panneau-collection" aria-expanded="true" aria-controls="panneau-collection">la collection</button>
 <button type="button" class="objet-lien" data-panneau="panneau-ordinaire" aria-expanded="false" aria-controls="panneau-ordinaire">l'ordinaire</button>
 </p>
 
@@ -24,7 +24,7 @@ sansTitre: true
 </figure>
 </div>
 
-<div class="objet-panneau" id="panneau-collection" hidden>
+<div class="objet-panneau" id="panneau-collection">
 <h2>l'histoire de la collection</h2>
 <p class="provisoire">contenu provisoire : à valider avec le centre (bead org-9s8.3)</p>
 <p>La collection naît d'une collection privée, portée par Élise Pic. Elle est aujourd'hui confiée à une association qui œuvre à sa sauvegarde et à sa mise en valeur, et s'ouvre au fonds de donation : les familles peuvent confier leurs photographies pour qu'elles rejoignent le commun des mortels.</p>
@@ -60,7 +60,7 @@ sansTitre: true
 <script>
 /* objet — trois liens légers (remplacent la barre des 3 points) :
    clic sur un lien → son panneau s'ouvre sur place ; re-clic ou autre lien → referme.
-   En arrivant : seul le pavé est visible. */
+   En arrivant : le panneau « la collection » est ouvert et son lien actif par défaut. */
 (function () {
 var liens = Array.prototype.slice.call(document.querySelectorAll('.objet-lien'));
 var panneaux = Array.prototype.slice.call(document.querySelectorAll('.objet-panneau'));

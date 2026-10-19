@@ -238,71 +238,54 @@ body {
   display: block;
   background: var(--ardoise);
 }
+/* légende sous la photo de gauche */
+.expo-legende {
+  margin: 0.6rem 0 0;
+  color: var(--dim);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
 .expo-liste { min-width: 0; }
 .expo-liste ol { list-style: none; margin: 0; padding: 0; }
 .expo-liste li { border-bottom: 1px solid rgba(245, 239, 228, 0.14); }
 .expo-liste li:first-child { border-top: 1px solid rgba(245, 239, 228, 0.14); }
-.expo-item {
+.expo-item { display: block; }
+.expo-item > summary {
   display: block;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
   padding: 0.75rem 0.3rem;
-  font-family: inherit;
-  font-size: 1rem;
-  color: var(--ink);
   cursor: pointer;
+  list-style: none;
   transition: background 0.15s;
 }
-.expo-item:hover { background: rgba(250, 182, 23, 0.07); }
-.expo-item:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; }
+.expo-item > summary::-webkit-details-marker { display: none; }
+.expo-item > summary:hover { background: rgba(250, 182, 23, 0.07); }
+.expo-item > summary:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; }
 .expo-nom { display: block; font-family: var(--font-titre); letter-spacing: 0.04em; }
-.expo-item.active .expo-nom { color: var(--accent); }
+.expo-item[open] .expo-nom { color: var(--accent); }
 .expo-meta { color: var(--dim); font-size: 0.82rem; white-space: nowrap; }
-/* popover : le visuel de l'expo au clic, se referme au clic ailleurs / Escape */
-.expo-pop {
-  position: fixed;
-  z-index: 40;
-  width: min(420px, calc(100vw - 24px));
-  background: var(--ardoise);
-  border: 1px solid rgba(245, 239, 228, 0.25);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
-  padding: 0.7rem;
+/* le visuel s'ouvre sous le titre, comme sur la page collection */
+.expo-visuel {
+  display: grid;
+  justify-items: start;
+  padding: 0 0.3rem 1rem;
 }
-.expo-pop img { width: 100%; height: auto; display: block; background: var(--bg); }
-.expo-pop-cap { margin-top: 0.5rem; color: var(--dim); font-size: 0.85rem; }
-.expo-pop-void {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 240px;
-  background: var(--bg);
-  color: var(--accent);
-  font-family: var(--font-titre);
-  font-size: 0.95rem;
-  letter-spacing: 0.22em;
-  text-transform: lowercase;
+.expo-visuel img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border: 2px solid rgba(250, 182, 23, 0.3);
+}
+.expo-void {
+  display: inline-block;
+  padding: 0.6rem 1rem;
+  border: 1px dashed rgba(245, 239, 228, 0.3);
+  color: var(--dim);
+  font-size: 0.85rem;
 }
 @media (max-width: 700px) {
   .expo-layout { grid-template-columns: 1fr; gap: 1.2rem; }
   .expo-fixe { position: static; }
   .expo-meta { white-space: normal; }
-  /* popover plein écran sur mobile */
-  .expo-pop {
-    left: 0 !important;
-    top: 0 !important;
-    width: 100vw;
-    height: 100vh;
-    border: 0;
-    box-shadow: none;
-    padding: 0;
-    display: none;
-  }
-  .expo-pop.open { display: flex; flex-direction: column; }
-  .expo-pop img { width: auto; max-width: 100%; max-height: calc(100vh - 3rem); align-self: center; }
-  .expo-pop-void { min-height: 0; flex: 1; width: 100%; }
-  .expo-pop-cap { padding: 0.8rem; }
 }
 
 /* ===== page 10 — contact ===== */
