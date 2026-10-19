@@ -8,46 +8,38 @@ html, body {
   height: 100%;
   overflow: hidden;
   background: var(--bg);
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
 }
 
+/* la scène occupe tout l'écran ; la photo est centrée dedans */
 #stage {
   position: fixed; inset: 0;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--bg);
 }
 
-#filmstrip-wrap {
-  position: absolute; inset: 0;
-  overflow: visible;
-}
-
-#filmstrip {
-  display: flex;
-  height: 100vh;
-  align-items: center;
-  will-change: transform;
-}
-
-#filmstrip img {
+#photo {
   display: block;
-  height: 100vh;
   width: auto;
-  flex-shrink: 0;
+  height: auto;
   object-fit: contain;
+  image-orientation: from-image;
   user-select: none;
   -webkit-user-select: none;
   -webkit-user-drag: none;
   -webkit-touch-callout: none;
   pointer-events: none;
+  background: rgba(255, 255, 255, 0.03);
 }
 
+/* barre bas-gauche : seulement le logo (clic = entrer sur le site) */
 #bottom-bar {
   position: fixed;
   bottom: 32px;
   left: 32px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
   z-index: 10;
 }
 
@@ -58,32 +50,9 @@ html, body {
   transition: opacity 0.2s;
 }
 #logo-tp:hover { opacity: 1; }
-#logo-tp svg { display: block; width: 56px; height: 56px; }
-
-.nav-btn {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(42, 46, 51, 0.5);
-  border: 1px solid rgba(245, 239, 228, 0.15);
-  color: var(--accent);
-  font-size: 28px;
-  font-weight: 300;
-  font-family: "Times New Roman", Times, serif;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-.nav-btn:hover {
-  background: rgba(250, 182, 23, 0.15);
-  border-color: var(--accent);
-}
+#logo-tp img { display: block; height: 40px; width: auto; }
 
 @media (max-width: 640px) {
-  #bottom-bar { bottom: 16px; left: 16px; gap: 8px; }
-  #logo-tp svg { width: 44px; height: 44px; }
-  .nav-btn { width: 40px; height: 40px; font-size: 22px; }
+  #bottom-bar { bottom: 16px; left: 16px; }
+  #logo-tp img { height: 32px; width: auto; }
 }

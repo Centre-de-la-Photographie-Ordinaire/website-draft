@@ -3,28 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>nouveau diaporama · centre de la photographie ordinaire</title>
-  <meta name="description" content="Nouveau diaporama — plein écran, animation fluide" />
+  <title>centre de la photographie ordinaire</title>
+  <meta name="description" content="Diaporama — centre de la photographie ordinaire" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="stage">
-    <div id="filmstrip-wrap">
-      <div id="filmstrip"></div>
-    </div>
+    <img id="photo" alt="">
   </div>
 
   <div id="bottom-bar">
-    <a id="logo-tp" href="../../" aria-label="retour à l'accueil">
-      <svg viewBox="0 0 200 200" role="img" aria-label="logo">
-        <rect width="200" height="200" fill="#FAB617"/>
-        <circle cx="100" cy="100" r="50" fill="#14171A"/>
-      </svg>
+    <a id="logo-tp" href="../../" aria-label="centre de la photographie ordinaire, entrer sur le site">
+      <img src="../../images/logo-cpo-horizontal.png" alt="" width="800" height="496">
     </a>
-    <button class="nav-btn" id="btn-prev" aria-label="précédent">‹</button>
-    <button class="nav-btn" id="btn-next" aria-label="suivant">›</button>
   </div>
 
-  <script src="main.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>

@@ -2,56 +2,116 @@
 <main class="main main-large">
 {{ .Content }}
 {{ with .Params.expos }}
-<div class="expo-grid-50">
-  <div class="expo-col-gauche">
-    {{ range $i, $e := . }}
-    <figure class="expo-image-large{{ if eq $i 0 }} active{{ end }}" data-expo-image="expo-{{ $i }}">
-      {{ with $e.image }}<img src="{{ . }}" alt="{{ $e.nom }}"{{ if eq $i 0 }} loading="eager"{{ else }} loading="lazy"{{ end }} />{{ end }}
-      <figcaption>{{ $e.date }} · {{ $e.lieu }}</figcaption>
-    </figure>
-    {{ end }}
-  </div>
-  <nav class="expo-col-droite" aria-label="liste des expositions">
+<div class="expo-layout">
+  <aside class="expo-fixe" aria-label="visuel du centre">
+    <img src="/images/expositions/image-fixe-gauche.jpg"
+         alt="Femme avec du scotch adhésif sur les yeux"
+         width="1600" height="1068" loading="eager">
+  </aside>
+  <nav class="expo-liste" aria-label="liste des expositions">
     <ol>
       {{ range $i, $e := . }}
       <li>
-        <button type="button" class="expo-item{{ if eq $i 0 }} active{{ end }}" data-expo="expo-{{ $i }}">
+        <button type="button" class="expo-item" data-i="{{ $i }}" aria-expanded="false">
           <span class="expo-nom">{{ $e.nom }}</span>
           <span class="expo-meta">{{ $e.date }} · {{ $e.lieu }}</span>
         </button>
-        <div class="expo-detail" id="expo-{{ $i }}">
-          {{ with $e.texte }}<p>{{ . }}</p>{{ end }}
-        </div>
       </li>
       {{ end }}
     </ol>
   </nav>
 </div>
 
+<div class="expo-pop" id="expo-pop" role="dialog" aria-modal="false" aria-label="visuel de l'exposition" hidden>
+  <div class="expo-pop-img"></div>
+  <figcaption class="expo-pop-cap"></figcaption>
+</div>
+
+<script type="application/json" id="expo-data">{{ . | jsonify | safeJS }}</script>
 <script>
-/* Expositions — col-6 image/legend + col-6 list with detail under each item (PDF pages 9-10) */
+/* Expositions — image fixe à gauche, liste à droite ;
+   clic sur une expo → son visuel apparaît (popover), clic ailleurs → se referme. */
 (function () {
+  var expos = JSON.parse(document.getElementById('expo-data').textContent);
+  var pop = document.getElementById('expo-pop');
+  var popImg = pop.querySelector('.expo-pop-img');
+  var popCap = pop.querySelector('.expo-pop-cap');
   var items = Array.prototype.slice.call(document.querySelectorAll('.expo-item'));
-  var images = Array.prototype.slice.call(document.querySelectorAll('.expo-image-large'));
-  if (!items.length || !images.length) return;
+  var openBtn = null;
+
+  function setPopContent(e) {
+    popImg.innerHTML = e.image
+      ? '<img src="' + e.image + '" alt="' + e.nom + '">'
+      : '<span class="expo-pop-void">à compléter</span>';
+    popCap.textContent = e.date + ' · ' + e.lieu;
+  }
+
+  function positionPop(btn) {
+    var r = btn.getBoundingClientRect();
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var mobile = vw <= 700;
+    if (mobile) { pop.style.left = '0'; pop.style.top = '0'; return; }
+    var pw = pop.offsetWidth, ph = pop.offsetHeight;
+    var left = r.left - pw - 14;                 // à gauche de l'item, au-dessus de la colonne image
+    if (left < 12) left = Math.min(Math.max(12, vw - pw - 12), vw - pw - 12);
+    var top = Math.min(Math.max(12, r.top - 8), vh - ph - 12);
+    if (top < 12) top = 12;
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+  }
+
+  function closePop() {
+    pop.hidden = true;
+    pop.classList.remove('open');
+    if (openBtn) {
+      openBtn.classList.remove('active');
+      openBtn.setAttribute('aria-expanded', 'false');
+      openBtn = null;
+    }
+  }
+
+  function openPop(btn) {
+    var i = +btn.dataset.i;
+    var e = expos[i];
+    if (!e) return;
+    setPopContent(e);
+    pop.hidden = false;
+    pop.classList.add('open');
+    positionPop(btn);
+    items.forEach(function (b) {
+      b.classList.toggle('active', b === btn);
+      b.setAttribute('aria-expanded', b === btn ? 'true' : 'false');
+    });
+    openBtn = btn;
+  }
 
   items.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var targetId = btn.dataset.expo;
-
-      items.forEach(function (b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      var detail = document.getElementById(targetId);
-      if (detail) {
-        var allDetails = Array.prototype.slice.call(document.querySelectorAll('.expo-detail'));
-        allDetails.forEach(function (d) { d.classList.remove('active'); });
-        detail.classList.toggle('active');
-      }
-
-      images.forEach(function (img) { img.classList.remove('active'); });
-      var activeImg = document.querySelector('.expo-image-large[data-expo-image="' + targetId + '"]');
-      if (activeImg) activeImg.classList.add('active');
+    btn.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      if (openBtn === btn) { closePop(); return; }  // second clic sur la même expo → referme
+      openPop(btn);
     });
+  });
+
+  // clic ailleurs → se referme
+  document.addEventListener('click', function (ev) {
+    if (pop.hidden) return;
+    if (pop.contains(ev.target)) return;
+    if (ev.target.closest('.expo-item')) return;
+    closePop();
+  });
+
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && !pop.hidden) closePop();
+  });
+
+  // le popover suit son item si la page défile / redimensionne
+  window.addEventListener('scroll', function () {
+    if (openBtn) positionPop(openBtn);
+  }, { passive: true });
+  window.addEventListener('resize', function () {
+    if (openBtn) positionPop(openBtn);
+    if (window.innerWidth > 700 && !pop.hidden) positionPop(openBtn);
   });
 })();
 </script>

@@ -9,8 +9,34 @@ sansTitre: true
 <p>3 000 000 de photographies amateurs et anonymes déploient un immense récit humain, du début de la photographie à nos jours. Le classement en plus de 400 thèmes révèle l'histoire du regard et des pratiques photographiques populaires.</p>
 <p>La collection sauvegarde ce patrimoine vernaculaire et œuvre à changer notre rapport aux photographies devenues anonymes.</p>
 
-<div id="objet-contenu-actif" class="objet-contenu-actif">
-<p class="provisoire">Cliquez sur un des boutons ci-dessous pour découvrir la collection.</p>
+<p class="objet-liens">
+<button type="button" class="objet-lien" data-panneau="panneau-interview" aria-expanded="false" aria-controls="panneau-interview">interview</button>
+<button type="button" class="objet-lien" data-panneau="panneau-collection" aria-expanded="false" aria-controls="panneau-collection">la collection</button>
+<button type="button" class="objet-lien" data-panneau="panneau-ordinaire" aria-expanded="false" aria-controls="panneau-ordinaire">l'ordinaire</button>
+</p>
+
+<div class="objet-panneau" id="panneau-interview" hidden>
+<h2>vidéo d'interview</h2>
+<p class="provisoire">vidéo à venir : aucun fichier disponible pour l'instant (bead org-9s8.3)</p>
+<figure class="video-ph">
+<div class="video-cadre" role="img" aria-label="emplacement de la vidéo d'interview">▶</div>
+<figcaption>vidéo d'interview : fichier à recevoir, puis intégré ici (lecture locale, pas de plateforme tierce si possible)</figcaption>
+</figure>
+</div>
+
+<div class="objet-panneau" id="panneau-collection" hidden>
+<h2>l'histoire de la collection</h2>
+<p class="provisoire">contenu provisoire : à valider avec le centre (bead org-9s8.3)</p>
+<p>La collection naît d'une collection privée, portée par Élise Pic. Elle est aujourd'hui confiée à une association qui œuvre à sa sauvegarde et à sa mise en valeur, et s'ouvre au fonds de donation : les familles peuvent confier leurs photographies pour qu'elles rejoignent le commun des mortels.</p>
+<p>La liste des séries : <a href="/collection/">page 4 · collection →</a></p>
+<blockquote>Question en attente de réponse du centre (suivi dans le bead org-9s8.8) : faut-il présenter ici la structure administrative du centre (statut, gouvernance, modalités de donation) ?</blockquote>
+</div>
+
+<div class="objet-panneau" id="panneau-ordinaire" hidden>
+<h2>le sens de notre travail sur l'ordinaire</h2>
+<p class="provisoire">contenu provisoire : texte définitif à venir (bead org-9s8.3)</p>
+<p>Le « commun des mortels » rassemble des photographies sans auteur connu, prises par et pour des familles. Notre travail consiste à donner leur place à ces images devenues anonymes : les sauvegarder, les classer en thèmes, les exposer.</p>
+<p>L'ordinaire photographié (les repas, les fêtes, les vacances, les jardins) est une archive de la vie courante. Le centre s'attache à montrer ce que ces 3 000 000 d'images disent de nous, et à changer notre rapport aux photographies que personne n'a « faites pour l'histoire ».</p>
 </div>
 </div>
 
@@ -31,46 +57,35 @@ sansTitre: true
 </div>
 </div>
 
-<div class="objet-bottom-bar">
-<button class="objet-tab-btn active" data-tab="interview" aria-label="interview">
-<span class="objet-btn-cercle"></span>
-<span class="objet-btn-label">interview</span>
-</button>
-<button class="objet-tab-btn" data-tab="collection" aria-label="la collection">
-<span class="objet-btn-cercle"></span>
-<span class="objet-btn-label">la collection</span>
-</button>
-<button class="objet-tab-btn" data-tab="ordinaire" aria-label="l'ordinaire">
-<span class="objet-btn-cercle"></span>
-<span class="objet-btn-label">l'ordinaire</span>
-</button>
-</div>
-
 <script>
+/* objet — trois liens légers (remplacent la barre des 3 points) :
+   clic sur un lien → son panneau s'ouvre sur place ; re-clic ou autre lien → referme.
+   En arrivant : seul le pavé est visible. */
 (function () {
-var contenus = {
-interview: '<h2>vidéo d\'interview</h2><p class="provisoire">vidéo à venir : aucun fichier disponible pour l\'instant (bead org-9s8.3)</p><figure class="video-ph"><div class="video-cadre" role="img" aria-label="emplacement de la vidéo d\'interview">▶</div><figcaption>vidéo d\'interview : fichier à recevoir, puis intégré ici (lecture locale, pas de plateforme tierce si possible)</figcaption></figure>',
-collection: '<h2>l\'histoire de la collection</h2><p class="provisoire">contenu provisoire : à valider avec le centre (bead org-9s8.3)</p><p>La collection naît d\'une collection privée, portée par Élise Pic. Elle est aujourd\'hui confiée à une association qui œuvre à sa sauvegarde et à sa mise en valeur, et s\'ouvre au fonds de donation : les familles peuvent confier leurs photographies pour qu\'elles rejoignent le commun des mortels.</p><blockquote>Question en attente de réponse du centre (suivi dans le bead org-9s8.8) : faut-il présenter ici la structure administrative du centre (statut, gouvernance, modalités de donation) ?</blockquote>',
-ordinaire: '<h2>le sens de notre travail sur l\'ordinaire</h2><p class="provisoire">contenu provisoire : texte définitif à venir (bead org-9s8.3)</p><p>Le « commun des mortels » rassemble des photographies sans auteur connu, prises par et pour des familles. Notre travail consiste à donner leur place à ces images devenues anonymes : les sauvegarder, les classer en thèmes, les exposer.</p><p>L\'ordinaire photographié (les repas, les fêtes, les vacances, les jardins) est une archive de la vie courante. Le centre s\'attache à montrer ce que ces 3 000 000 d\'images disent de nous, et à changer notre rapport aux photographies que personne n\'a « faites pour l\'histoire ».</p>'
-};
-var zone = document.getElementById('objet-contenu-actif');
-var btns = Array.prototype.slice.call(document.querySelectorAll('.objet-tab-btn'));
+var liens = Array.prototype.slice.call(document.querySelectorAll('.objet-lien'));
+var panneaux = Array.prototype.slice.call(document.querySelectorAll('.objet-panneau'));
 
-if (!zone || !btns.length) return;
-
-btns.forEach(function (btn) {
-btn.addEventListener('click', function () {
-btns.forEach(function (b) { b.classList.remove('active'); });
-btn.classList.add('active');
-var tab = btn.dataset.tab;
-if (tab && contenus[tab]) zone.innerHTML = contenus[tab];
-});
-});
-
-var first = btns[0];
-if (first) {
-var tab = first.dataset.tab;
-if (tab && contenus[tab]) zone.innerHTML = contenus[tab];
+function closeAll() {
+panneaux.forEach(function (p) { p.hidden = true; });
+liens.forEach(function (l) { l.classList.remove('active'); l.setAttribute('aria-expanded', 'false'); });
 }
+
+liens.forEach(function (lien) {
+lien.addEventListener('click', function () {
+var panneau = document.getElementById(lien.dataset.panneau);
+if (!panneau) return;
+var etaitOuvert = !panneau.hidden;
+closeAll();
+if (!etaitOuvert) {
+panneau.hidden = false;
+lien.classList.add('active');
+lien.setAttribute('aria-expanded', 'true');
+}
+});
+});
+
+document.addEventListener('keydown', function (e) {
+if (e.key === 'Escape') closeAll();
+});
 })();
 </script>

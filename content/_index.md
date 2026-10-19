@@ -12,7 +12,7 @@ title: brouillons
 
 ### interaction
 
-- [**nouveau diaporama** →](experiments/nouveau-diaporama/) : maquette design PDF — image plein écran, logo kodak color, pagination, animation fluide.
+- [**nouveau diaporama** →](experiments/nouveau-diaporama/) : la page vitrine — un diaporama très basique : une image reste affichée deux secondes, puis une autre prend sa place, en boucle ; le logo mène au site.
 
 ### archive
 

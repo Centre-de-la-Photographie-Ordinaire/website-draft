@@ -1,192 +1,114 @@
-(function () {
-  'use strict';
+// centre de la photographie ordinaire — page vitrine (diaporama très basique)
+// Une image reste affichée DEUX SECONDES, puis une autre prend sa place,
+// puis une autre, en boucle, en ordre séquentiel. Pas de défilé continu,
+// pas de boutons, pas de pagination. Le logo (bas-gauche) mène au site.
+'use strict';
 
-  var IMAGES_JSON = 'images.json';
-  var images = [];
-  var currentIndex = 0;
-  var filmstrip = document.getElementById('filmstrip');
-  var btnPrev = document.getElementById('btn-prev');
-  var btnNext = document.getElementById('btn-next');
-  var busy = false;
+// ---------------------------------------------------------------- réglages
+const INTERVAL = 2000;      // temps d'affichage d'une image (ms)
+const TARGET_RATIO = 0.64;  // part de l'écran occupée par la photo (bureau)
+const TARGET_RATIO_PHONE = 0.86; // écran étroit : presque toute la largeur
+const PHONE_MAX_W = 640;    // en dessous de cette largeur : « étroit »
+const PREFETCH = 4;         // images préchargées d'avance
 
-  var TRANSITION = 'transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)';
+// ---------------------------------------------------------------- éléments
+const img = document.getElementById('photo');
 
-  function shuffle(arr) {
-    for (var i = arr.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
-    }
-    return arr;
+// ---------------------------------------------------------------- jeu d'images
+// images.json : liste SÉQUENTIELLE des fichiers (ordre d'affichage conservé).
+async function loadList() {
+  try {
+    const r = await fetch('images.json?t=' + Date.now());
+    const data = await r.json();
+    const list = Array.isArray(data) ? data : data.images;
+    if (Array.isArray(list) && list.length) return list;
+  } catch (e) { /* fallback ci-dessous */ }
+  return [];
+}
+
+// ---------------------------------------------------------------- préchargement
+const loaded = new Map(); // i -> Image (chargée)
+function load(i) {
+  const n = order.length;
+  const k = ((i % n) + n) % n;
+  if (!loaded.has(k)) {
+    const im = new Image();
+    im.decoding = 'async';
+    im.src = order[k];
+    loaded.set(k, im);
   }
+  return loaded.get(k);
+}
+function prefetch(from) {
+  for (let d = 1; d <= PREFETCH; d++) load(from + d);
+}
 
-  // Calcule translateX pour centrer l'image a targetIdx
-  function centerOn(targetIdx) {
-    var imgs = filmstrip.children;
-    if (!imgs.length) return;
-    var offset = 0;
-    for (var i = 0; i < targetIdx && i < imgs.length; i++) {
-      offset += imgs[i].offsetWidth;
-    }
-    var vw = window.innerWidth;
-    var w = imgs[targetIdx] ? imgs[targetIdx].offsetWidth : 0;
-    filmstrip.style.transform = 'translateX(' + ((vw - w) / 2 - offset) + 'px)';
-  }
+// ---------------------------------------------------------------- dimensionnement
+// La photo occupe une grande part de l'écran sans jamais le remplir ni se
+// déformer (ratio conservé), et sans passer sous la barre du logo.
+let currentSize = null; // { w, h } naturelles de la photo affichée
+function sizeImage() {
+  if (!currentSize) return;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const narrow = vw <= PHONE_MAX_W;
+  const ratio = narrow ? TARGET_RATIO_PHONE : TARGET_RATIO;
 
-  function build(srcs, centerIdx) {
-    var frag = document.createDocumentFragment();
-    srcs.forEach(function (src) {
-      var img = document.createElement('img');
-      img.src = src;
-      img.alt = '';
-      img.draggable = false;
-      img.decoding = 'async';
-      frag.appendChild(img);
-    });
-    filmstrip.replaceChildren(frag);
-    requestAnimationFrame(function () {
-      centerOn(centerIdx);
-    });
-  }
+  // place réservée en bas pour le logo (bottom 32 + h 40 = 72 ; mobile 16+32=48)
+  const reservedBottom = (narrow ? 48 : 72) + 16;
 
-  function showSteady() {
-    if (busy) return;
-    var total = images.length;
-    var srcs = [ -2, -1, 0, 1, 2 ].map(function (d) {
-      return images[(currentIndex + d + total) % total];
-    });
-    filmstrip.style.transition = 'none';
-    build(srcs, 2);
-  }
+  const maxW = vw * ratio;
+  const maxH = vh - 2 * reservedBottom;
 
-  function animateSlide(srcs, startIdx, endIdx, newIdx) {
-    busy = true;
-    var frag = document.createDocumentFragment();
-    srcs.forEach(function (src) {
-      var img = document.createElement('img');
-      img.src = src;
-      img.alt = '';
-      img.draggable = false;
-      img.decoding = 'async';
-      frag.appendChild(img);
-    });
-    filmstrip.replaceChildren(frag);
+  const scale = Math.min(maxW / currentSize.w, maxH / currentSize.h);
+  img.style.width = Math.round(currentSize.w * scale) + 'px';
+  img.style.height = Math.round(currentSize.h * scale) + 'px';
+}
+window.addEventListener('resize', sizeImage);
+window.addEventListener('orientationchange', sizeImage);
 
-    requestAnimationFrame(function () {
-      // Frame 1: position de depart, pas de transition
-      filmstrip.style.transition = 'none';
-      centerOn(startIdx);
-      // Force le reflow pour que le navigateur enregistre la position de depart
-      void filmstrip.offsetHeight;
+// ---------------------------------------------------------------- affichage
+let current = -1;
+let timer = null;
 
-      // Frame 1 (suite): transition + position d'arrivee
-      filmstrip.style.transition = TRANSITION;
-      centerOn(endIdx);
+function show(k) {
+  const n = order.length;
+  const i = ((k % n) + n) % n;
+  current = k;
+  const im = load(i);
+  im.addEventListener('load', () => {
+    // une image plus récente a pris la main en attendant ?
+    if (((k % n) + n) % n !== (((current % n) + n) % n)) return;
+    currentSize = { w: im.naturalWidth, h: im.naturalHeight };
+    img.src = im.src;
+    sizeImage();
+  }, { once: true });
+  if (im.complete && im.naturalWidth) im.dispatchEvent(new Event('load'));
+}
 
-      filmstrip.addEventListener('transitionend', function f() {
-        currentIndex = newIdx;
-        busy = false;
-        showSteady();
-        filmstrip.removeEventListener('transitionend', f);
-      }, { once: true });
-    });
-  }
+function tick() {
+  show(current + 1);
+  prefetch(current + 1);
+  timer = setTimeout(tick, INTERVAL);
+}
 
-  function slideNext() {
-    if (busy || !images.length) return;
-    var total = images.length;
-    var nIdx = (currentIndex + 1) % total;
-    var srcs = [
-      images[(currentIndex - 1 + total) % total],
-      images[currentIndex],
-      images[nIdx],
-      images[(nIdx + 1) % total],
-      images[(nIdx + 2) % total]
-    ];
-    animateSlide(srcs, 1, 2, nIdx);
-  }
-
-  function slidePrev() {
-    if (busy || !images.length) return;
-    var total = images.length;
-    var pIdx = (currentIndex - 1 + total) % total;
-    var srcs = [
-      images[(pIdx - 2 + total) % total],
-      images[(pIdx - 1 + total) % total],
-      images[pIdx],
-      images[currentIndex],
-      images[(currentIndex + 1) % total]
-    ];
-    animateSlide(srcs, 3, 2, pIdx);
-  }
-
-  function start() {
-    if (!images.length) return;
-    currentIndex = images.length > 5 ? 3 : 0;
-    // Precharger les 5 premieres images avant d'afficher quoi que ce soit.
-    var total = images.length;
-    var srcs = [ -2, -1, 0, 1, 2 ].map(function (d) {
-      return images[(currentIndex + d + total) % total];
-    });
-    var loaded = 0;
-    srcs.forEach(function (src) {
-      var img = new Image();
-      img.onload = function () {
-        loaded++;
-        if (loaded >= srcs.length) {
-          // Toutes les images sont dans le cache navigateur -> showSteady
-          showSteady();
-        }
-      };
-      img.onerror = function () {
-        loaded++;
-        if (loaded >= srcs.length) showSteady();
-      };
-      img.src = src;
-    });
-    // Securite si les images sont deja en cache (onload deja declenche)
-    if (loaded >= srcs.length) showSteady();
-  }
-
-  function loadImages() {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', IMAGES_JSON + '?t=' + Date.now(), true);
-    xhr.onload = function () {
-      if (xhr.status === 200) {
-        try {
-          var data = JSON.parse(xhr.responseText);
-          if (Array.isArray(data)) images = shuffle(data);
-          else if (data.images) images = shuffle(data.images);
-          start();
-        } catch (e) { fallbackScan(); }
-      } else { fallbackScan(); }
-    };
-    xhr.onerror = fallbackScan;
-    xhr.send();
-  }
-
-  function fallbackScan() {
-    var base = '../diaporama/images/';
-    images = shuffle([
-      '20250804_185251.jpg',
-      '20241106_080230.jpg',
-      '20241024_120525.jpg'
-    ].map(function (n) { return base + n; }));
-    start();
-  }
-
-  if (btnPrev) btnPrev.addEventListener('click', slidePrev);
-  if (btnNext) btnNext.addEventListener('click', slideNext);
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'ArrowRight') slideNext();
-    else if (e.key === 'ArrowLeft') slidePrev();
+// ---------------------------------------------------------------- démarrage
+const order = await loadList();
+if (!order.length) {
+  document.body.innerHTML = '<p style="padding:2rem">aucune image trouvée (images.json)</p>';
+} else {
+  // première image en attente que les 2 premières soient chargées
+  const first = load(0);
+  const second = load(1);
+  const wait = Promise.all([first, second].map(im =>
+    im.complete ? Promise.resolve() : new Promise(res => {
+      im.addEventListener('load', res, { once: true });
+      im.addEventListener('error', res, { once: true });
+    })));
+  wait.then(() => {
+    show(0);
+    timer = setTimeout(tick, INTERVAL);
   });
-  window.addEventListener('resize', function () {
-    if (!busy && filmstrip.children.length) {
-      filmstrip.style.transition = 'none';
-      centerOn(2);
-    }
-  });
-  document.getElementById('stage').addEventListener('contextmenu', function (e) { e.preventDefault(); });
+}
 
-  loadImages();
-})();
+document.getElementById('stage').addEventListener('contextmenu', e => e.preventDefault());

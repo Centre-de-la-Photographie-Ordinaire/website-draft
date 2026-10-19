@@ -30,7 +30,9 @@ body {
 .site-header {
   position: relative;
   display: flex;
-  align-items: center;
+  /* noms de pages ALIGNÉS EN HAUT du logo (demande client 2026-10-19),
+     pas centrés verticalement */
+  align-items: flex-start;
   gap: 1rem;
   width: 100%;
   max-width: 70rem;
@@ -217,27 +219,36 @@ body {
 }
 .video-ph figcaption { margin-top: 0.6rem; color: var(--dim); font-size: 0.88rem; }
 
-/* ===== page 5 — expositions : liste (col-4) + contenu de la sélection (col-8) ===== */
+/* ===== page 5 — expositions : image fixe à gauche + liste à droite + popover visuel =====
+   (retour client 2026-10-19 : le visuel de gauche reste FIXE ; au clic sur une
+   expo, son visuel APPARAÎT en popover et se REFERME au clic ailleurs) */
 .main-large { max-width: 70rem; }
-.md-grid {
+.expo-layout {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: minmax(280px, 1fr) minmax(300px, 1.1fr);
   gap: 2.5rem;
   align-items: start;
   margin-top: 1.8rem;
 }
-.md-liste { grid-column: span 4; }
-.md-contenu { grid-column: span 8; min-width: 0; }
-.md-liste ol { list-style: none; margin: 0; padding: 0; }
-.md-liste li { border-bottom: 1px solid rgba(245, 239, 228, 0.14); }
-.md-liste li:first-child { border-top: 1px solid rgba(245, 239, 228, 0.14); }
+/* image fixe (fille au scotch) : ne change jamais au clic */
+.expo-fixe { position: sticky; top: 1.2rem; min-width: 0; }
+.expo-fixe img {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: var(--ardoise);
+}
+.expo-liste { min-width: 0; }
+.expo-liste ol { list-style: none; margin: 0; padding: 0; }
+.expo-liste li { border-bottom: 1px solid rgba(245, 239, 228, 0.14); }
+.expo-liste li:first-child { border-top: 1px solid rgba(245, 239, 228, 0.14); }
 .expo-item {
   display: block;
   width: 100%;
   text-align: left;
   background: none;
   border: none;
-  padding: 0.85rem 0.3rem;
+  padding: 0.75rem 0.3rem;
   font-family: inherit;
   font-size: 1rem;
   color: var(--ink);
@@ -245,22 +256,53 @@ body {
   transition: background 0.15s;
 }
 .expo-item:hover { background: rgba(250, 182, 23, 0.07); }
+.expo-item:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; }
 .expo-nom { display: block; font-family: var(--font-titre); letter-spacing: 0.04em; }
 .expo-item.active .expo-nom { color: var(--accent); }
-.expo-meta { color: var(--dim); font-size: 0.85rem; white-space: nowrap; }
-.expo-detail { display: none; }
-.expo-detail.active { display: block; }
-.expo-detail img {
-  width: 100%;
-  max-height: 62vh;
-  object-fit: contain;
+.expo-meta { color: var(--dim); font-size: 0.82rem; white-space: nowrap; }
+/* popover : le visuel de l'expo au clic, se referme au clic ailleurs / Escape */
+.expo-pop {
+  position: fixed;
+  z-index: 40;
+  width: min(420px, calc(100vw - 24px));
   background: var(--ardoise);
+  border: 1px solid rgba(245, 239, 228, 0.25);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  padding: 0.7rem;
+}
+.expo-pop img { width: 100%; height: auto; display: block; background: var(--bg); }
+.expo-pop-cap { margin-top: 0.5rem; color: var(--dim); font-size: 0.85rem; }
+.expo-pop-void {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  background: var(--bg);
+  color: var(--accent);
+  font-family: var(--font-titre);
+  font-size: 0.95rem;
+  letter-spacing: 0.22em;
+  text-transform: lowercase;
 }
 @media (max-width: 700px) {
-  .md-grid { grid-template-columns: 1fr; gap: 1rem; }
-  .md-liste, .md-contenu { grid-column: auto; }
-  .md-liste { border-bottom: 1px solid rgba(245, 239, 228, 0.14); padding-bottom: 0.6rem; }
+  .expo-layout { grid-template-columns: 1fr; gap: 1.2rem; }
+  .expo-fixe { position: static; }
   .expo-meta { white-space: normal; }
+  /* popover plein écran sur mobile */
+  .expo-pop {
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw;
+    height: 100vh;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+    display: none;
+  }
+  .expo-pop.open { display: flex; flex-direction: column; }
+  .expo-pop img { width: auto; max-width: 100%; max-height: calc(100vh - 3rem); align-self: center; }
+  .expo-pop-void { min-height: 0; flex: 1; width: 100%; }
+  .expo-pop-cap { padding: 0.8rem; }
 }
 
 /* ===== page 10 — contact ===== */
@@ -310,12 +352,29 @@ body {
 }
 .objet-col-texte { display: flex; flex-direction: column; gap: 1.1rem; line-height: 1.7; }
 .objet-col-texte p { margin: 0; }
-.objet-contenu-actif {
+/* ligne des trois liens légers (remplace la barre des 3 points — retour 2026-10-19) */
+.objet-liens { display: flex; gap: 1.6rem; margin-top: 0.3rem; }
+.objet-lien {
+  background: none;
+  border: none;
+  border-bottom: 1px solid transparent;
+  padding: 0;
+  font-family: var(--font-titre);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.objet-lien:hover { color: var(--accent); border-bottom-color: var(--accent); }
+.objet-lien.active { color: var(--accent); }
+/* panneaux de contenu sur place (fermés à l'arrivée : le pavé est visible) */
+.objet-panneau {
   margin-top: 1.2rem;
   padding-top: 1.2rem;
   border-top: 1px solid rgba(245, 239, 228, 0.14);
 }
-.objet-contenu-actif h2 {
+.objet-panneau h2 {
   font-family: var(--font-titre);
   font-size: 0.9rem;
   font-weight: 700;
@@ -324,7 +383,7 @@ body {
   margin: 0 0 0.8em;
   color: var(--accent);
 }
-.objet-contenu-actif blockquote {
+.objet-panneau blockquote {
   border-left: 2px solid var(--accent);
   margin: 0.9rem 0;
   padding-left: 1rem;
@@ -335,91 +394,65 @@ body {
 .objet-image-principale { margin: 0; }
 .objet-image-principale img { width: 100%; height: auto; display: block; }
 
-/* bottom bar — 3 boutons avec cercle jaune */
-.objet-bottom-bar {
-  display: flex;
-  justify-content: center;
-  gap: 2.5rem;
-  padding: 1.5rem 0 0.5rem;
-  border-top: 1px solid rgba(245, 239, 228, 0.14);
-  margin-top: 1rem;
-}
-.objet-tab-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.4rem 0.8rem;
-  color: var(--dim);
-  font-family: var(--font-titre);
-  font-size: 0.85rem;
-  letter-spacing: 0.1em;
-  text-transform: lowercase;
-  transition: color 0.2s;
-}
-.objet-btn-cercle {
-  display: block;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 2px solid var(--accent);
-  background: transparent;
-  transition: background 0.2s, transform 0.2s;
-}
-.objet-tab-btn:hover { color: var(--ink); }
-.objet-tab-btn:hover .objet-btn-cercle { background: rgba(250, 182, 23, 0.15); transform: scale(1.05); }
-.objet-tab-btn.active { color: var(--accent); }
-.objet-tab-btn.active .objet-btn-cercle {
-  background: var(--accent);
-  box-shadow: 0 0 12px rgba(250, 182, 23, 0.4);
-}
-.objet-btn-label { font-size: 0.85rem; letter-spacing: 0.12em; font-weight: 500; }
-
 @media (max-width: 700px) {
   .objet-layout { grid-template-columns: 1fr; gap: 1.4rem; }
   .objet-col-image { order: -1; }
-  .objet-bottom-bar {
-    position: sticky;
-    bottom: 0;
-    gap: 1.2rem;
-    padding: 1rem 0.5rem;
-    background: var(--bg);
-    border-top: 1px solid rgba(245, 239, 228, 0.2);
-    margin-top: 0;
-  }
-  .objet-btn-cercle { width: 38px; height: 38px; }
+  .objet-liens { gap: 1.1rem; }
 }
 
-/* ===== page 2 — missions : cards avec cadre ===== */
-.missions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.5rem;
-  margin: 1.5rem 0;
+/* ===== page 2 — missions : texte fixe haut + 4 pavés sur rectangle jaune =====
+   (retour client 2026-10-19 : un petit rectangle jaune derrière les pavés,
+   qui déborde INÉGALLEMENT et les lie entre eux ; les pavés sont opaques) */
+.missions-intro { margin-bottom: 2.2rem; max-width: 62rem; }
+.missions-intro p + p { margin-top: 1.1em; }
+.missions-jaune {
+  position: relative;
+  max-width: 50rem;
+  margin: 0 0 1.5rem;
 }
-.mission-card {
-  border: 2px solid rgba(250, 182, 23, 0.35);
-  padding: 1.4rem;
-  background: rgba(20, 23, 26, 0.25);
-  transition: border-color 0.2s;
+/* le rectangle jaune — offsets NÉGATIFS ASYMÉTRIQUES = débordé inégal */
+.missions-jaune::before {
+  content: "";
+  position: absolute;
+  top: -18px;
+  left: -28px;
+  right: 36px;
+  bottom: -10px;
+  background: var(--accent);
+  z-index: 0;
 }
-.mission-card:hover { border-color: var(--accent); }
-.mission-card h3 {
+.mission-pave {
+  position: relative;
+  z-index: 1;
+  background: var(--bg); /* opaque : le jaune ne transparaît pas dans le texte */
+  padding: 1.3rem 1.6rem 1.2rem;
+  margin: 0 0 1.15rem;
+}
+.mission-pave:last-child { margin-bottom: 0; }
+.mission-pave h3 {
   font-family: var(--font-titre);
   font-size: 1.05rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: lowercase;
-  margin: 0 0 0.7em;
-  color: var(--accent);
+  letter-spacing: 0.06em;
+  margin: 0 0 0.8em;
+  color: var(--ink);
 }
-.mission-card p {
+.mission-pave ul {
   margin: 0;
-  line-height: 1.7;
+  padding-left: 1.15rem;
+  display: grid;
+  gap: 0.35rem;
+}
+.mission-pave li {
+  line-height: 1.55;
   font-size: 0.95rem;
+}
+.mission-pave li::marker { color: var(--accent); }
+@media (max-width: 700px) {
+  .missions-jaune::before {
+    top: -10px; left: -8px; right: 12px; bottom: -8px; /* débordé réduit sur mobile */
+  }
+  .mission-pave { padding: 1.1rem 1.1rem 1rem; }
 }
 /* ===== page 3 — agenda : images en ligne, contenu au clic ===== */
 .agenda-list {
@@ -515,71 +548,7 @@ body {
 
 /* accordéon JS : collection — fermer l'item ouvert avant d'en ouvrir un autre */
 
-/* ===== page 5 — expositions : nouveau layout 50/50 (PDF pages 9-10) ===== */
-.expo-grid-50 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2.5rem;
-  align-items: start;
-  margin-top: 1.5rem;
-}
-.expo-col-gauche {
-  min-width: 0;
-  position: sticky;
-  top: 1rem;
-}
-.expo-image-large {
-  display: none;
-  margin: 0;
-}
-.expo-image-large.active { display: block; }
-.expo-image-large img {
-  width: 100%;
-  max-height: 55vh;
-  object-fit: contain;
-  background: var(--ardoise);
-  display: block;
-}
-.expo-image-large figcaption {
-  margin-top: 0.5rem;
-  color: var(--dim);
-  font-size: 0.9rem;
-  font-style: italic;
-}
-.expo-col-droite {
-  max-height: 80vh;
-  overflow-y: auto;
-  padding-right: 0.5rem;
-}
-.expo-col-droite ol { list-style: none; margin: 0; padding: 0; }
-.expo-col-droite li { border-bottom: 1px solid rgba(245, 239, 228, 0.12); }
-.expo-col-droite li:first-child { border-top: 1px solid rgba(245, 239, 228, 0.12); }
-.expo-item {
-  display: block;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  padding: 0.75rem 0.3rem;
-  font-family: inherit;
-  font-size: 1rem;
-  color: var(--ink);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.expo-item:hover { background: rgba(250, 182, 23, 0.07); }
-.expo-nom { display: block; font-family: var(--font-titre); letter-spacing: 0.04em; }
-.expo-item.active .expo-nom { color: var(--accent); }
-.expo-meta { color: var(--dim); font-size: 0.8rem; white-space: nowrap; }
-.expo-detail { display: none; padding: 0.5rem 0.3rem 0.8rem; line-height: 1.6; }
-.expo-detail.active { display: block; }
-.expo-detail p { margin: 0; font-size: 0.92rem; }
-
-@media (max-width: 700px) {
-  .expo-grid-50 { grid-template-columns: 1fr; gap: 1rem; }
-  .expo-col-gauche { order: -1; }
-  .expo-meta { white-space: normal; }
-}
+/* (ancien layout 50/50 expositions, remplacé par .expo-layout — voir plus haut) */
 
 /* ===== page 6 — collecte ===== */
 .collecte-content { max-width: 40rem; }
