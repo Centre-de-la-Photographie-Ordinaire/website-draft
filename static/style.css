@@ -50,7 +50,7 @@ body {
   letter-spacing: 0.02em;
   line-height: 1.15;
 }
-.menu-wrap { flex-shrink: 0; }
+.menu-wrap { flex-shrink: 0; position: relative; }
 .menu-toggle {
   display: flex;
   flex-direction: column;
@@ -74,8 +74,10 @@ body {
   display: flex;
   flex-direction: column;
   position: absolute;
-  top: calc(100% - 2px);
-  right: 1.5rem;
+  /* just under the toggle button: .menu-wrap is the positioning context, so
+     100% is the button's own bottom edge (client request 2026-10-19). */
+  top: calc(100% + 0.4rem);
+  right: 0;
   z-index: 30;
   min-width: 11.5rem;
   background: var(--ardoise);
