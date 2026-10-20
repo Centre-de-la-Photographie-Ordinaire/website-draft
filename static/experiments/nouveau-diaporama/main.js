@@ -1,7 +1,9 @@
 // centre de la photographie ordinaire — page vitrine (diaporama très basique)
 // Une image reste affichée DEUX SECONDES, puis une autre prend sa place,
 // puis une autre, en boucle, en ordre séquentiel. Pas de défilé continu,
-// pas de boutons, pas de pagination. Le logo (bas-gauche) mène au site.
+// pas de pagination. Boutons ‹ › (bas-gauche) et flèches clavier pour
+// feuilletter : la lecture auto repart de l'image affichée. Le logo
+// (bas-gauche) mène au site.
 'use strict';
 
 // ---------------------------------------------------------------- réglages
@@ -92,8 +94,29 @@ function tick() {
   timer = setTimeout(tick, INTERVAL);
 }
 
+// ---------------------------------------------------------------- navigation
+// ‹ › (boutons, bas-gauche) ou flèches clavier : afficher immédiatement la
+// photo précédente / suivante (boucle en modulo, gérée par show()) et
+// relancer la lecture auto depuis cette image.
+function step(dir) {
+  if (!order.length) return;
+  show(current + dir);
+  prefetch(current + dir);
+  if (timer) clearTimeout(timer);
+  timer = setTimeout(tick, INTERVAL);
+}
+
 // ---------------------------------------------------------------- démarrage
 const order = await loadList();
+
+// Écouteurs branchés APRÈS le chargement de order (sinon un clic pendant la
+// requête images.json tomberait sur `order` non initialisée).
+document.getElementById('btn-prev').addEventListener('click', () => step(-1));
+document.getElementById('btn-next').addEventListener('click', () => step(1));
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'ArrowLeft') { e.preventDefault(); step(-1); }
+  if (e.code === 'ArrowRight') { e.preventDefault(); step(1); }
+});
 if (!order.length) {
   document.body.innerHTML = '<p style="padding:2rem">aucune image trouvée (images.json)</p>';
 } else {
