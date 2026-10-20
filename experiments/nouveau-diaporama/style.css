@@ -1,0 +1,86 @@
+:root {
+  --ink: #f2efe9;
+  --accent: #FAB617;
+  --bg: #2A2E33;
+}
+* { margin: 0; box-sizing: border-box; }
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* la scène occupe tout l'écran ; la photo est centrée dedans */
+#stage {
+  position: fixed; inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+
+#photo {
+  display: block;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  image-orientation: from-image;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* barre bas-gauche : le logo (clic = entrer sur le site) + navigation ‹ › */
+#bottom-bar {
+  position: fixed;
+  bottom: 32px;
+  left: 32px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+}
+
+#logo-tp {
+  display: block;
+  line-height: 0;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+#logo-tp:hover { opacity: 1; }
+#logo-tp img { display: block; height: 40px; width: auto; }
+
+/* boutons ‹ › : navigation photo précédente / suivante */
+.nav-btn {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(42, 46, 51, 0.5);
+  border: 1px solid rgba(242, 239, 233, 0.15);
+  color: var(--accent);
+  font-size: 28px;
+  font-weight: 300;
+  font-family: "Times New Roman", Times, serif;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-btn:hover {
+  background: rgba(250, 182, 23, 0.15);
+  border-color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  #bottom-bar { bottom: 16px; left: 16px; gap: 8px; }
+  #logo-tp img { height: 32px; width: auto; }
+  .nav-btn { width: 40px; height: 40px; font-size: 22px; }
+}
