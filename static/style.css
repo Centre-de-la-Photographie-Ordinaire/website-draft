@@ -535,7 +535,19 @@ body {
 
 /* (ancien layout 50/50 expositions, remplacé par .expo-layout — voir plus haut) */
 
-/* ===== page 6 — collecte ===== */
+/* ===== page 6 — résidences ===== */
+.residences-content { max-width: 40rem; }
+.residences-content h2 {
+  font-family: var(--font-titre);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: lowercase;
+  margin: 1.5em 0 0.8em;
+  color: var(--accent);
+}
+
+/* ===== page 7 — collecte ===== */
 .collecte-content { max-width: 40rem; }
 .collecte-content h2 {
   font-family: var(--font-titre);
@@ -547,7 +559,7 @@ body {
   color: var(--accent);
 }
 
-/* ===== page 7 — soutien ===== */
+/* ===== page 8 — soutien ===== */
 .soutien-content { max-width: 40rem; }
 .soutien-content ul { list-style: none; padding: 0; margin: 0 0 1.5em; }
 .soutien-content li {
@@ -558,7 +570,7 @@ body {
 }
 .soutien-content li:last-child { border-bottom: none; }
 
-/* ===== page 8 — fabrique : accordéon mono-ouvert ===== */
+/* ===== page 9 — fabrique : accordéon mono-ouvert ===== */
 .fabrique-list {
   display: flex;
   flex-direction: column;

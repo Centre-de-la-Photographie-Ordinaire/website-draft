@@ -26,9 +26,10 @@ title: brouillons
 - [**page 3 · agenda** →](agenda/) : ateliers et stages proposés par le centre — design avec bordures kodak.
 - [**page 4 · collection** →](collection/) : liste alphabétique des séries de la collection — design accordéon.
 - [**page 5 · expositions** →](expositions/) : la liste des expositions et leur contenu (image + légende / liste) — nouveau layout 50/50.
-- [**page 6 · collecte** →](collecte/) : modalités de donation de photographies.
-- [**page 7 · soutien** →](soutien/) : comment soutenir le centre.
-- [**page 8 · fabrique** →](fabrique/) : vidéo, articles, bibliographie, presse.
+- [**page 6 · résidences** →](residences/) : résidences d'artistes et de chercheuses au centre.
+- [**page 7 · collecte** →](collecte/) : modalités de donation de photographies.
+- [**page 8 · soutien** →](soutien/) : comment soutenir le centre.
+- [**page 9 · fabrique** →](fabrique/) : vidéo, articles, bibliographie, presse.
 - [**page 10 · contact** →](contact/) : coordonnées et formulaire de contact.
 
 ## note
