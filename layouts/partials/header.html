@@ -1,7 +1,7 @@
 {{/* header partagé — logo + titre haut-gauche (variante A, cf. experiment logo-titre),
      hamburger DROPDOWN à droite (remplace la navbar inline) */}}
 <header class="site-header">
-  <a href="/" class="logo-lien" aria-label="centre de la photographie ordinaire, retour à l'accueil">
+  <a href="{{ relURL "" }}" class="logo-lien" aria-label="centre de la photographie ordinaire, retour à l'accueil">
     {{ partial "logo.html" (dict "size" 56) }}
   </a>
   <div class="header-titres">
@@ -12,16 +12,16 @@
       <span></span><span></span><span></span>
     </button>
     <nav id="site-nav" class="nav" aria-label="navigation principale">
-      <a href="/">accueil</a>
-      <a href="/objet/">page 1 · objet</a>
-      <a href="/missions/">page 2 · missions</a>
-      <a href="/agenda/">page 3 · agenda</a>
-      <a href="/collection/">page 4 · collection</a>
-      <a href="/expositions/">page 5 · expositions</a>
-      <a href="/collecte/">page 6 · collecte</a>
-      <a href="/soutien/">page 7 · soutien</a>
-      <a href="/fabrique/">page 8 · fabrique</a>
-      <a href="/contact/">page 10 · contact</a>
+      <a href="{{ relURL "" }}">accueil</a>
+      <a href="{{ "objet/" | relURL }}">page 1 · objet</a>
+      <a href="{{ "missions/" | relURL }}">page 2 · missions</a>
+      <a href="{{ "agenda/" | relURL }}">page 3 · agenda</a>
+      <a href="{{ "collection/" | relURL }}">page 4 · collection</a>
+      <a href="{{ "expositions/" | relURL }}">page 5 · expositions</a>
+      <a href="{{ "collecte/" | relURL }}">page 6 · collecte</a>
+      <a href="{{ "soutien/" | relURL }}">page 7 · soutien</a>
+      <a href="{{ "fabrique/" | relURL }}">page 8 · fabrique</a>
+      <a href="{{ "contact/" | relURL }}">page 10 · contact</a>
     </nav>
   </div>
 </header>

@@ -28,7 +28,7 @@ sansTitre: true
 <h2>l'histoire de la collection</h2>
 <p class="provisoire">contenu provisoire : à valider avec le centre (bead org-9s8.3)</p>
 <p>La collection naît d'une collection privée, portée par Élise Pic. Elle est aujourd'hui confiée à une association qui œuvre à sa sauvegarde et à sa mise en valeur, et s'ouvre au fonds de donation : les familles peuvent confier leurs photographies pour qu'elles rejoignent le commun des mortels.</p>
-<p>La liste des séries : <a href="/collection/">page 4 · collection →</a></p>
+<p>La liste des séries : <a href="{{< rel "collection/" >}}">page 4 · collection →</a></p>
 <blockquote>Question en attente de réponse du centre (suivi dans le bead org-9s8.8) : faut-il présenter ici la structure administrative du centre (statut, gouvernance, modalités de donation) ?</blockquote>
 </div>
 
@@ -42,7 +42,7 @@ sansTitre: true
 
 <div class="objet-col-image">
 <figure class="objet-image-principale">
-<img src="/images/front.webp" alt="Photographie issue de la collection « le commun des mortels »" width="1400" height="932" loading="eager">
+<img src="{{< rel "images/front.webp" >}}" alt="Photographie issue de la collection « le commun des mortels »" width="1400" height="932" loading="eager">
 </figure>
 
 <div class="logo-partenaires">
@@ -50,7 +50,7 @@ sansTitre: true
 {{< logo size=80 >}}
 </div>
 <div class="logo-ministere">
-<img class="logo-bicentenaire" src="/images/bicentenaire_circle_logo.png" alt="Bicentenaire de la photographie 1826–2026" width="736" height="334">
+<img class="logo-bicentenaire" src="{{< rel "images/bicentenaire_circle_logo.png" >}}" alt="Bicentenaire de la photographie 1826–2026" width="736" height="334">
 <p class="mention-bicentenaire">De septembre 2026 à septembre 2027, les expositions et ateliers proposés sont labellisés par le Ministère de la Culture dans le cadre du Bicentenaire de la Photographie.</p>
 </div>
 </div>

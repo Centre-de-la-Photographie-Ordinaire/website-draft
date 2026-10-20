@@ -9,7 +9,7 @@ title: Agenda
     <summary>
       <div class="agenda-summary">
         <div class="agenda-image-frame">
-          <img src="/images/front.webp" alt="Venez voir !" loading="lazy" />
+          <img src="{{< rel "images/front.webp" >}}" alt="Venez voir !" loading="lazy" />
         </div>
         <div class="agenda-info">
           <span class="agenda-titre">Venez voir !</span>
@@ -28,7 +28,7 @@ title: Agenda
     <summary>
       <div class="agenda-summary">
         <div class="agenda-image-frame">
-          <img src="/images/front.webp" alt="Laboratoire argentique" loading="lazy" />
+          <img src="{{< rel "images/front.webp" >}}" alt="Laboratoire argentique" loading="lazy" />
         </div>
         <div class="agenda-info">
           <span class="agenda-titre">Photo — Laboratoire Argentique</span>
@@ -46,7 +46,7 @@ title: Agenda
     <summary>
       <div class="agenda-summary">
         <div class="agenda-image-frame">
-          <img src="/images/front.webp" alt="Cyanotype" loading="lazy" />
+          <img src="{{< rel "images/front.webp" >}}" alt="Cyanotype" loading="lazy" />
         </div>
         <div class="agenda-info">
           <span class="agenda-titre">Cyanotype</span>
@@ -63,7 +63,7 @@ title: Agenda
     <summary>
       <div class="agenda-summary">
         <div class="agenda-image-frame">
-          <img src="/images/front.webp" alt="Colorisation manuelle" loading="lazy" />
+          <img src="{{< rel "images/front.webp" >}}" alt="Colorisation manuelle" loading="lazy" />
         </div>
         <div class="agenda-info">
           <span class="agenda-titre">Colorisation manuelle des photos</span>
@@ -80,7 +80,7 @@ title: Agenda
     <summary>
       <div class="agenda-summary">
         <div class="agenda-image-frame">
-          <img src="/images/front.webp" alt="Sténopé" loading="lazy" />
+          <img src="{{< rel "images/front.webp" >}}" alt="Sténopé" loading="lazy" />
         </div>
         <div class="agenda-info">
           <span class="agenda-titre">Sténopé</span>
@@ -97,7 +97,7 @@ title: Agenda
     <summary>
       <div class="agenda-summary">
         <div class="agenda-image-frame">
-          <img src="/images/front.webp" alt="Faites des photos qui vous ressemblent" loading="lazy" />
+          <img src="{{< rel "images/front.webp" >}}" alt="Faites des photos qui vous ressemblent" loading="lazy" />
         </div>
         <div class="agenda-info">
           <span class="agenda-titre">Faites des photos qui vous ressemblent !</span>
@@ -114,7 +114,7 @@ title: Agenda
     <summary>
       <div class="agenda-summary">
         <div class="agenda-image-frame">
-          <img src="/images/front.webp" alt="La photo dans tous ses états" loading="lazy" />
+          <img src="{{< rel "images/front.webp" >}}" alt="La photo dans tous ses états" loading="lazy" />
         </div>
         <div class="agenda-info">
           <span class="agenda-titre">La PHOTO dans tous ses états !</span>

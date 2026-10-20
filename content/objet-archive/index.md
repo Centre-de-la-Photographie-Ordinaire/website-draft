@@ -10,7 +10,7 @@ sansTitre: true
     <p>La collection sauvegarde ce patrimoine vernaculaire et œuvre à changer notre rapport aux photographies devenues anonymes.</p>
   </section>
   <figure class="esprit-image">
-    <img src="/images/front.webp" alt="Photographie issue de la collection « le commun des mortels »" width="1400" height="932" loading="eager">
+    <img src="{{< rel "images/front.webp" >}}" alt="Photographie issue de la collection « le commun des mortels »" width="1400" height="932" loading="eager">
   </figure>
 </div>
 
@@ -48,7 +48,7 @@ sansTitre: true
     {{< logo size=96 >}}
   </div>
   <div class="logo-ministere">
-    <img class="logo-bicentenaire" src="/images/bicentenaire_circle_logo.png" alt="Bicentenaire de la photographie 1826–2026" width="736" height="334">
+    <img class="logo-bicentenaire" src="{{< rel "images/bicentenaire_circle_logo.png" >}}" alt="Bicentenaire de la photographie 1826–2026" width="736" height="334">
     <p class="mention-bicentenaire">De septembre 2026 à septembre 2027, les expositions et ateliers proposés sont labellisés par le Ministère de la Culture dans le cadre du Bicentenaire de la Photographie.</p>
   </div>
 </div>
