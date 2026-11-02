@@ -264,7 +264,7 @@ body {
   min-width: 0;
   /* seul le bloc de la liste défile (retour client) : la page, elle, ne bouge
      plus quand on parcourt les expositions. */
-  max-height: calc(100vh - 8rem);
+  max-height: calc(100vh - 12rem);
   overflow-y: auto;
   overscroll-behavior: contain;   /* le scroll ne se propage pas à la page */
   -webkit-overflow-scrolling: touch;

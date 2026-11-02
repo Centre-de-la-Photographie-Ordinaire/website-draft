@@ -11,16 +11,19 @@
   </aside>
   <div class="expo-liste">
     <ol>
-      {{ range $i, $e := . }}
+      {{/* tri par date croissante (2016 → 2026), quel que soit l'ordre du
+           fichier ; à date égale, l'ordre du fichier est conservé. */}}
+      {{ range sort . "date" "asc" }}
+      {{ $nom := .nom }}
       <li>
         <details class="expo-item">
           <summary>
-            <span class="expo-nom">{{ $e.nom }}</span>
-            <span class="expo-meta">{{ $e.date }} · {{ $e.lieu }}</span>
+            <span class="expo-nom">{{ .nom }}</span>
+            <span class="expo-meta">{{ .date }} · {{ .lieu }}</span>
           </summary>
           <div class="expo-visuel">
-            {{ with $e.image }}
-            <img src="{{ relURL . }}" alt="{{ $e.nom }}" loading="lazy">
+            {{ with .image }}
+            <img src="{{ relURL . }}" alt="{{ $nom }}" loading="lazy">
             {{ else }}
             <span class="expo-void">à compléter</span>
             {{ end }}
