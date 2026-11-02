@@ -2,14 +2,23 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>centre de la photographie ordinaire</title>
   <meta name="description" content="Diaporama — centre de la photographie ordinaire" />
+  <meta name="theme-color" content="#14171A" />
+  <link rel="icon" href="../../favicon.png" sizes="any" />
+  <link rel="apple-touch-icon" href="../../favicon.png" />
+  <!-- les visuels disponibles apparaissent dès le premier rendu -->
+  <link rel="preload" as="image" href="images/desktop/01-1920.webp" media="(min-aspect-ratio: 29/20)" />
+  <link rel="preload" as="image" href="images/tablet/01-1024.webp"
+        media="(min-aspect-ratio: 9/10) and (max-aspect-ratio: 29/20)" />
+  <link rel="preload" as="image" href="images/phone/01-1080.webp" media="(max-aspect-ratio: 9/10)" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="stage">
-    <img id="photo" alt="">
+    <img id="photo" alt="" width="1920" height="1080"
+         decoding="async" fetchpriority="high" />
   </div>
 
   <div id="bottom-bar">

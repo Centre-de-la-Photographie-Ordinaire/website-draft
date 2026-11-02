@@ -1,11 +1,11 @@
 /* cdlpo-wa : premier deploiement du bot 2026-10-16 */
 /* charte graphique — centre de la photographie ordinaire
-   fond : gris anthracite #2A2E33
+   fond de page : noir ardoise #14171A
    texte : blanc chamois #F5EFE4
    accent : jaune #FAB617 | orange #F37120 | bleu encre #1B4F8C
-   noir ardoise #14171A */
+   gris anthracite #2A2E33 : surfaces posées sur le fond (cadres, pavés) */
 :root {
-  --bg: #2A2E33;
+  --bg: #14171A;
   --ink: #F5EFE4;
   --accent: #FAB617;
   --orange: #F37120;
@@ -80,8 +80,12 @@ body {
   right: 0;
   z-index: 30;
   min-width: 11.5rem;
-  background: var(--ardoise);
+  /* le menu doit se détacher du fond de page : --bg et --ardoise sont
+     désormais la même couleur (#14171A), on remonte donc d'un cran avec le
+     gris anthracite de la charte (#2A2E33), plus un léger relief. */
+  background: #2A2E33;
   border: 1px solid rgba(245, 239, 228, 0.18);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
   padding: 0.6rem;
   gap: 0.1rem;
   opacity: 0;

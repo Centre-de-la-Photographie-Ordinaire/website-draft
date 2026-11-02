@@ -42,7 +42,10 @@ sansTitre: true
 
 <div class="objet-col-image">
 <figure class="objet-image-principale">
-<img src="{{< rel "images/front.webp" >}}" alt="Photographie issue de la collection « le commun des mortels »" width="1400" height="932" loading="eager">
+<picture>
+<source srcset="{{< rel "images/bloc_objet.webp" >}}" type="image/webp">
+<img src="{{< rel "images/bloc_objet.jpg" >}}" alt="Photographies de la collection « le commun des mortels » — visuel du bicentenaire de la photographie" width="1400" height="1133" loading="eager" decoding="async">
+</picture>
 </figure>
 
 <div class="logo-partenaires">

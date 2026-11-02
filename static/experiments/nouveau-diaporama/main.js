@@ -1,42 +1,147 @@
 // centre de la photographie ordinaire — page vitrine (diaporama très basique)
-// Une image reste affichée DEUX SECONDES, puis une autre prend sa place,
-// puis une autre, en boucle, en ordre séquentiel. Pas de défilé continu,
-// pas de pagination. Boutons ‹ › (bas-gauche) et flèches clavier pour
-// feuilletter : la lecture auto repart de l'image affichée. Le logo
+//
+// Une image reste affichée DEUX SECONDES, puis une autre prend sa place, en
+// boucle, en ordre séquentiel. Boutons ‹ › (bas-gauche) et flèches clavier
+// pour feuilleter : la lecture auto repart de l'image affichée. Le logo
 // (bas-gauche) mène au site.
+//
+// CADRAGES — les visuels existent en trois montages, produits par
+// tools/build-diaporama.sh (même sujet, cadrage adapté au terminal) :
+//   desktop  16:9  1920 / 1280 px de large
+//   tablet    4:3  1024 /  768
+//   phone   9:16  1080 /  720
+// On sert le montage qui correspond réellement aux proportions de l'écran — y
+// compris un téléphone en paysage ou un écran de bureau en portrait — et,
+// dans ce montage, la variante de largeur la plus proche de la densité réelle
+// (1x / 2x). La photo couvre ensuite TOUTE la fenêtre, bord à bord.
 'use strict';
 
 // ---------------------------------------------------------------- réglages
-const INTERVAL = 2000;      // temps d'affichage d'une image (ms)
-const TARGET_RATIO = 0.64;  // part de l'écran occupée par la photo (bureau)
-const TARGET_RATIO_PHONE = 0.86; // écran étroit : presque toute la largeur
-const PHONE_MAX_W = 640;    // en dessous de cette largeur : « étroit »
-const PREFETCH = 4;         // images préchargées d'avance
+const INTERVAL = 2000;           // temps d'affichage d'une image (ms)
+// La photo occupe TOUT l'écran (bord à bord, plein cadre) : le cadrage
+// (16:9 / 4:3 / 9:16) est choisi pour correspondre à l'écran, donc il n'y a
+// presque rien à rogner. Voir sizeImage().
+const PHONE_MAX_W = 640;         // en dessous de cette largeur : « étroit »
+const PREFETCH = 4;              // images préchargées d'avance
+const SETTLE_MS = 350;           // délai avant de figer le cadrage initial
 
-// ---------------------------------------------------------------- éléments
+const stage = document.getElementById('stage');
 const img = document.getElementById('photo');
 
-// ---------------------------------------------------------------- jeu d'images
-// images.json : liste SÉQUENTIELLE des fichiers (ordre d'affichage conservé).
-async function loadList() {
+// ---------------------------------------------------------------- chargement de la liste
+// images.json (écrit par tools/build-diaporama.sh) :
+//   { order: ["01", …],
+//     formats: { desktop: { aspect: "16:9", widths: [1920, 1280] }, … },
+//     images: { desktop: [ { stem, base, w, h }, … ], … } }
+let data = { order: [], formats: {}, images: {} };
+
+async function loadData() {
   try {
-    const r = await fetch('images.json?t=' + Date.now());
-    const data = await r.json();
-    const list = Array.isArray(data) ? data : data.images;
-    if (Array.isArray(list) && list.length) return list;
-  } catch (e) { /* fallback ci-dessous */ }
-  return [];
+    const r = await fetch('images.json?t=' + Date.now(), { cache: 'no-cache' });
+    const d = await r.json();
+    if (d && Array.isArray(d.order) && d.order.length) return d;
+  } catch (e) { /* traité plus bas */ }
+  return { order: [], formats: {}, images: {} };
+}
+
+// ---------------------------------------------------------------- choix du cadrage
+// D'après les proportions de la fenêtre ET la largeur en CSS px :
+//   portrait (ratio < 0.90)         → phone   (9:16)
+//   carré / tablette (ratio < 1.55) → tablet  (4:3)
+//   paysage large                   → desktop (16:9)
+// Le 4:3 tolère mieux les fenêtres peu hautes : un écran 1440×900 (1.6) ou un
+// téléphone en paysage n'ont pas la place de montrer du 16:9 en grand une fois
+// la barre du logo déduite, alors que le 4:3 remplit toute la hauteur.
+function pickFormat() {
+  const vw = window.innerWidth;
+  const vh = Math.max(1, window.innerHeight);
+  const ratio = vw / vh;
+  if (vw <= PHONE_MAX_W || ratio < 0.90) return 'phone';
+  // fenêtre très basse (téléphone en paysage, ~390 px de haut) : le 16:9
+  // n'aurait plus que ~350 px de haut une fois la barre déduite, le 4:3 est
+  // carrément plus généreux en surface visible.
+  if (vh < 500) return 'tablet';
+  if (ratio < 1.55) return 'tablet';
+  return 'desktop';
+}
+
+// Le cadrage est figé après SETTLE_MS (le temps que la barre d'URL mobile se
+// stabilise), puis n'est recalculé que si le terminal change réellement de
+// famille — rotation, redimensionnement. Les oscillations de quelques pixels
+// ne relancent rien.
+let format = null;
+let frozen = false;
+
+function syncFormat() {
+  const next = pickFormat();
+  if (next !== format) {
+    format = next;
+    rebuild();
+    return true;
+  }
+  return false;
+}
+
+// ---------------------------------------------------------------- variantes
+// Une entrée par photo pour le cadrage courant : { base, w, h, src, jpg }.
+// La variante de largeur visée est choisie d'après la place que la photo
+// occupera à l'écran multipliée par la densité de l'écran.
+let entries = [];
+let loaded = new Map();   // i -> Image en cours de chargement / chargée
+
+// La photo couvre toute la fenêtre : on ne réserve plus de place pour le logo
+// (il flotte par-dessus, en bas à gauche) ni de marge latérale.
+function layoutBox() {
+  return {
+    maxW: window.innerWidth,
+    maxH: Math.max(1, window.innerHeight),
+  };
+}
+
+function variantWidth(box, natW, natH) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  // largeur rendue en plein cadre = largeur couverte à l'écran
+  const scale = Math.max(box.maxW / natW, box.maxH / natH);
+  const want = Math.max(1, Math.round(natW * scale * dpr));
+  const list = (data.images[format] || []);
+  const widths = ((data.formats[format] || {}).widths || [])
+    .slice()
+    .sort((a, b) => a - b);
+  const avail = widths.length ? widths : (natW && [natW] || []);
+  if (!avail.length) return null;
+  return avail.find(w => w >= want) || avail[avail.length - 1];
+}
+
+function rebuild() {
+  const box = layoutBox();
+  entries = (data.images[format] || []).map(it => {
+    const w = variantWidth(box, it.w, it.h) || it.w;
+    return {
+      base: it.base,
+      w: it.w,           // géométrie intrinsèque du cadrage (sert au dimensionnement)
+      h: it.h,
+      src: `${it.base}-${w}.webp`,
+      jpg: `${it.base}-${w}.jpg`,
+    };
+  });
+  loaded.clear();
+  stage.dataset.format = format;
+  // dimensions intrinsèques exposées au CSS : permet de réserver la place
+  // exacte de la photo avant même son chargement (pas de saut de mise en page)
+  const ref = entries[0] || { w: 16, h: 9 };
+  stage.style.setProperty('--nat-w', ref.w);
+  stage.style.setProperty('--nat-h', ref.h);
 }
 
 // ---------------------------------------------------------------- préchargement
-const loaded = new Map(); // i -> Image (chargée)
 function load(i) {
-  const n = order.length;
+  const n = entries.length;
+  if (!n) return null;
   const k = ((i % n) + n) % n;
   if (!loaded.has(k)) {
     const im = new Image();
     im.decoding = 'async';
-    im.src = order[k];
+    im.src = entries[k].src;
     loaded.set(k, im);
   }
   return loaded.get(k);
@@ -46,46 +151,66 @@ function prefetch(from) {
 }
 
 // ---------------------------------------------------------------- dimensionnement
-// La photo occupe une grande part de l'écran sans jamais le remplir ni se
-// déformer (ratio conservé), et sans passer sous la barre du logo.
-let currentSize = null; // { w, h } naturelles de la photo affichée
+// La photo occupe la plus grande place possible sans dépasser la fenêtre, sans
+// toucher la barre du logo et sans déformation. Si le navigateur ne supporte
+// pas WebP, on retombe sur le JPEG.
 function sizeImage() {
-  if (!currentSize) return;
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const narrow = vw <= PHONE_MAX_W;
-  const ratio = narrow ? TARGET_RATIO_PHONE : TARGET_RATIO;
-
-  // place réservée en bas pour le logo (bottom 32 + h 40 = 72 ; mobile 16+32=48)
-  const reservedBottom = (narrow ? 48 : 72) + 16;
-
-  const maxW = vw * ratio;
-  const maxH = vh - 2 * reservedBottom;
-
-  const scale = Math.min(maxW / currentSize.w, maxH / currentSize.h);
-  img.style.width = Math.round(currentSize.w * scale) + 'px';
-  img.style.height = Math.round(currentSize.h * scale) + 'px';
+  const entry = entries[((current % entries.length) + entries.length) % entries.length];
+  if (!entry) return;
+  const box = layoutBox();
+  // plein cadre : on dimensionne à la fenêtre entière et c'est object-fit:
+  // cover (style.css) qui absorbe l'écart résiduel entre le cadrage et l'écran.
+  // Le cadrage étant choisi pour l'écran, ce rognage reste marginal.
+  const scale = Math.max(box.maxW / entry.w, box.maxH / entry.h);
+  img.style.width = Math.round(entry.w * scale) + 'px';
+  img.style.height = Math.round(entry.h * scale) + 'px';
 }
-window.addEventListener('resize', sizeImage);
-window.addEventListener('orientationchange', sizeImage);
+
+let resizeTimer = null;
+function onResize() {
+  if (!frozen) { syncFormat(); return; }
+  if (syncFormat()) {
+    // le cadrage a changé : on repart de la photo courante dans le nouveau montage
+    show(current, { restartTimer: false });
+    return;
+  }
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(sizeImage, 80);
+}
 
 // ---------------------------------------------------------------- affichage
 let current = -1;
 let timer = null;
 
-function show(k) {
-  const n = order.length;
+// WebP ? (détection une fois pour toutes, pas de requête supplémentaire)
+const SUPPORTS_WEBP = (() => {
+  const c = document.createElement('canvas');
+  return c.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+})();
+
+function show(k, opts) {
+  const n = entries.length;
+  if (!n) return;
   const i = ((k % n) + n) % n;
   current = k;
+  const entry = entries[i];
   const im = load(i);
-  im.addEventListener('load', () => {
-    // une image plus récente a pris la main en attendant ?
-    if (((k % n) + n) % n !== (((current % n) + n) % n)) return;
-    currentSize = { w: im.naturalWidth, h: im.naturalHeight };
-    img.src = im.src;
+
+  const paint = () => {
+    if (((current % n) + n) % n !== i) return;      // une autre photo a pris la main
+    img.src = SUPPORTS_WEBP ? entry.src : entry.jpg;
     sizeImage();
-  }, { once: true });
-  if (im.complete && im.naturalWidth) im.dispatchEvent(new Event('load'));
+  };
+
+  if (im.complete && im.naturalWidth) {
+    paint();
+  } else {
+    im.addEventListener('load', paint, { once: true });
+    im.addEventListener('error', () => {
+      // WebP illisible mais JPEG présent → repli (une seule fois)
+      if (img.src.indexOf('.webp') >= 0) img.src = entry.jpg;
+    }, { once: true });
+  }
 }
 
 function tick() {
@@ -95,43 +220,58 @@ function tick() {
 }
 
 // ---------------------------------------------------------------- navigation
-// ‹ › (boutons, bas-gauche) ou flèches clavier : afficher immédiatement la
-// photo précédente / suivante (boucle en modulo, gérée par show()) et
-// relancer la lecture auto depuis cette image.
 function step(dir) {
-  if (!order.length) return;
+  if (!entries.length) return;
   show(current + dir);
   prefetch(current + dir);
-  if (timer) clearTimeout(timer);
+  clearTimeout(timer);
   timer = setTimeout(tick, INTERVAL);
 }
 
 // ---------------------------------------------------------------- démarrage
-const order = await loadList();
+(async function start() {
+  data = await loadData();
 
-// Écouteurs branchés APRÈS le chargement de order (sinon un clic pendant la
-// requête images.json tomberait sur `order` non initialisée).
-document.getElementById('btn-prev').addEventListener('click', () => step(-1));
-document.getElementById('btn-next').addEventListener('click', () => step(1));
-window.addEventListener('keydown', (e) => {
-  if (e.code === 'ArrowLeft') { e.preventDefault(); step(-1); }
-  if (e.code === 'ArrowRight') { e.preventDefault(); step(1); }
-});
-if (!order.length) {
-  document.body.innerHTML = '<p style="padding:2rem">aucune image trouvée (images.json)</p>';
-} else {
-  // première image en attente que les 2 premières soient chargées
+  if (!data.order.length || !Object.keys(data.images).length) {
+    document.body.innerHTML =
+      '<p style="padding:2rem;color:#f2efe9;font-family:system-ui">' +
+      'aucun visuel trouvé (images.json). lancer tools/build-diaporama.sh.</p>';
+    return;
+  }
+
+  format = pickFormat();
+  rebuild();
+
+  document.getElementById('btn-prev').addEventListener('click', () => step(-1));
+  document.getElementById('btn-next').addEventListener('click', () => step(1));
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'ArrowLeft') { e.preventDefault(); step(-1); }
+    if (e.code === 'ArrowRight') { e.preventDefault(); step(1); }
+  });
+  window.addEventListener('resize', onResize);
+  window.addEventListener('orientationchange', () => setTimeout(onResize, 250));
+
+  // on attend que les deux premières photos du cadrage retenu soient prêtes :
+  // pas de démarrage sur un cadre vide.
   const first = load(0);
   const second = load(1);
-  const wait = Promise.all([first, second].map(im =>
-    im.complete ? Promise.resolve() : new Promise(res => {
-      im.addEventListener('load', res, { once: true });
-      im.addEventListener('error', res, { once: true });
-    })));
-  wait.then(() => {
-    show(0);
-    timer = setTimeout(tick, INTERVAL);
+  const ready = (im) => new Promise((res) => {
+    if (!im || im.complete) return res();
+    im.addEventListener('load', res, { once: true });
+    im.addEventListener('error', res, { once: true });
   });
-}
+  await Promise.all([ready(first), ready(second)]);
 
-document.getElementById('stage').addEventListener('contextmenu', e => e.preventDefault());
+  show(0);
+  timer = setTimeout(tick, INTERVAL);
+
+  // la barre d'URL mobile modifie la hauteur après le premier rendu : on fige
+  // le cadrage une fois l'écran stabilisé (sans jamais changer de montage en
+  // cours de lecture si la famille d'écran reste la même).
+  setTimeout(() => {
+    frozen = true;
+    syncFormat();
+  }, SETTLE_MS);
+})();
+
+stage.addEventListener('contextmenu', (e) => e.preventDefault());

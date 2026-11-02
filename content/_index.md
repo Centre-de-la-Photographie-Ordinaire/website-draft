@@ -12,7 +12,7 @@ title: brouillons
 
 ### interaction
 
-- [**nouveau diaporama** →](experiments/nouveau-diaporama/) : la page vitrine — un diaporama très basique : une image reste affichée deux secondes, puis une autre prend sa place, en boucle ; les boutons ‹ › (bas gauche) feuillettent les photos, le logo mène au site.
+- [**nouveau diaporama** →](experiments/nouveau-diaporama/) : la page vitrine — un diaporama très basique : une image reste affichée deux secondes, puis une autre prend sa place, en boucle ; les boutons ‹ › (bas gauche) feuillettent les photos, le logo mène au site. Trois montages du même sujet (16:9 bureau, 4:3 tablette, 9:16 téléphone) : c'est le cadrage adapté à l'écran qui est servi, à la bonne définition (voir le `README.md` de l'expérience pour régénérer les visuels).
 
 ### archive
 
