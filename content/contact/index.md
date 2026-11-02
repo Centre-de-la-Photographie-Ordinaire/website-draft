@@ -1,5 +1,5 @@
 ---
-title: contact
+title: Contact
 ---
 
 <h2>coordonnées</h2>

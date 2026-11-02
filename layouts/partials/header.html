@@ -5,24 +5,23 @@
     {{ partial "logo.html" (dict "size" 56) }}
   </a>
   <div class="header-titres">
-    <p class="site-titre">{{ if .IsHome }}centre de la photographie ordinaire{{ else }}{{ .Title }}{{ end }}</p>
+    {{/* le titre de la page courante ; sur la page « objet » (et l'accueil),
+         on affiche le titre du site. */}}
+    <p class="site-titre">{{ if or .IsHome (eq .RelPermalink ("objet/" | relURL)) }}centre de la photographie ordinaire{{ else }}{{ .Title }}{{ end }}</p>
   </div>
   <div class="menu-wrap">
     <button class="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav">
       <span></span><span></span><span></span>
     </button>
     <nav id="site-nav" class="nav" aria-label="navigation principale">
-      <a href="{{ relURL "" }}">accueil</a>
-      <a href="{{ "objet/" | relURL }}">page 1 · objet</a>
-      <a href="{{ "missions/" | relURL }}">page 2 · missions</a>
-      <a href="{{ "agenda/" | relURL }}">page 3 · agenda</a>
-      <a href="{{ "collection/" | relURL }}">page 4 · collection</a>
-      <a href="{{ "expositions/" | relURL }}">page 5 · expositions</a>
-      <a href="{{ "residences/" | relURL }}">page 6 · résidences</a>
-      <a href="{{ "collecte/" | relURL }}">page 7 · collecte</a>
-      <a href="{{ "soutien/" | relURL }}">page 8 · soutien</a>
-      <a href="{{ "fabrique/" | relURL }}">page 9 · fabrique</a>
-      <a href="{{ "contact/" | relURL }}">page 10 · contact</a>
+      {{/* libellés = titres des pages (menu config), sans préfixe « page N · » ;
+           l'accueil garde son libellé de menu (« accueil ») et non son titre de
+           page, qui est celui du sommaire des brouillons. */}}
+      {{ range site.Menus.main }}
+        {{ $titre := .Name }}
+        {{ if and .Page (not .Page.IsHome) }}{{ $titre = .Page.Title }}{{ end }}
+        <a href="{{ .URL }}">{{ $titre }}</a>
+      {{ end }}
     </nav>
   </div>
 </header>

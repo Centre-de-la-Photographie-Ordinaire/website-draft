@@ -1,6 +1,10 @@
 ---
 title: Expositions
 expos:
+  - nom: "L'ÉTE PHOTOGRAPHIQUE DE LECTOURE 2025"
+    date: "2025"
+    lieu: "Lectoure (Gers)"
+    image: "images/expositions/2018-ete-photographique-lectoure.jpg"
   - nom: "LUSSAN MILLE PHOTOS"
     date: "2016"
     lieu: "Premier festival de la photo de famille, Lussan (Gers)"
@@ -87,4 +91,3 @@ expos:
     image: "images/expositions/2026-ces-presque-riens-cugnaux.jpg"
 ---
 
-<p class="provisoire">liste des expositions importée de <code>expositions.txt</code> (2016 → 2026). Visuels réels fournis par le centre le 2026-10-19 ; les expositions sans visuel affichent « à compléter ».</p>

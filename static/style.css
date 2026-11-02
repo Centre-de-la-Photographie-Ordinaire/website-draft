@@ -4,6 +4,15 @@
    texte : blanc chamois #F5EFE4
    accent : jaune #FAB617 | orange #F37120 | bleu encre #1B4F8C
    gris anthracite #2A2E33 : surfaces posées sur le fond (cadres, pavés) */
+/* ===== fonte des titres : DINdong (auto-hébergée, cf. experiments/font-dindong) ===== */
+@font-face {
+  font-family: "DINdong";
+  src: url("fonts/dindong/DINdong.woff2") format("woff2"),
+       url("fonts/dindong/DINdong.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 :root {
   --bg: #14171A;
   --ink: #F5EFE4;
@@ -12,7 +21,10 @@
   --bleu: #1B4F8C;
   --ardoise: #14171A;
   --dim: rgba(245, 239, 228, 0.55);
-  --font-titre: "DIN", "DIN Condensed", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-titre: "DINdong", "DIN", "DIN Condensed", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* corps de texte : Spectral, la serif de la charte (auto-hébergée via
+     Google Fonts, cf. <head>) ; repli sur les serif système */
+  --font-corps: "Spectral", Georgia, "Times New Roman", serif;
 }
 * { margin: 0; box-sizing: border-box; }
 html { background: var(--bg); }
@@ -22,7 +34,7 @@ body {
   flex-direction: column;
   background: var(--bg);
   color: var(--ink);
-  font-family: "Spectral", Georgia, "Times New Roman", serif;
+  font-family: var(--font-corps);
   font-size: 1.02rem;
 }
 
@@ -139,10 +151,7 @@ body {
 .main ul { list-style: none; padding: 0; }
 .main ul li {
   margin: 0.9em 0;
-  padding-bottom: 0.9em;
-  border-bottom: 1px solid rgba(245, 239, 228, 0.14);
 }
-.main ul li:last-child { border-bottom: none; }
 .provisoire, .note {
   color: var(--dim);
   font-size: 0.88rem;
@@ -251,7 +260,25 @@ body {
   font-size: 0.85rem;
   line-height: 1.4;
 }
-.expo-liste { min-width: 0; }
+.expo-liste {
+  min-width: 0;
+  /* seul le bloc de la liste défile (retour client) : la page, elle, ne bouge
+     plus quand on parcourt les expositions. */
+  max-height: calc(100vh - 8rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;   /* le scroll ne se propage pas à la page */
+  -webkit-overflow-scrolling: touch;
+  /* la marge interne évite que le focus/hover colle au bord */
+  padding-right: 0.4rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(250, 182, 23, 0.45) transparent;
+}
+.expo-liste::-webkit-scrollbar { width: 8px; }
+.expo-liste::-webkit-scrollbar-track { background: transparent; }
+.expo-liste::-webkit-scrollbar-thumb {
+  background: rgba(250, 182, 23, 0.45);
+  border-radius: 4px;
+}
 .expo-liste ol { list-style: none; margin: 0; padding: 0; }
 .expo-liste li { border-bottom: 1px solid rgba(245, 239, 228, 0.14); }
 .expo-liste li:first-child { border-top: 1px solid rgba(245, 239, 228, 0.14); }
@@ -292,6 +319,12 @@ body {
   .expo-layout { grid-template-columns: 1fr; gap: 1.2rem; }
   .expo-fixe { position: static; }
   .expo-meta { white-space: normal; }
+  /* sur une colonne, la liste reprend le défilement de la page */
+  .expo-liste {
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
+  }
 }
 
 /* ===== page 10 — contact ===== */
@@ -341,27 +374,83 @@ body {
 }
 .objet-col-texte { display: flex; flex-direction: column; gap: 1.1rem; line-height: 1.7; }
 .objet-col-texte p { margin: 0; }
-/* ligne des trois liens légers (remplace la barre des 3 points — retour 2026-10-19) */
-.objet-liens { display: flex; gap: 1.6rem; margin-top: 0.3rem; }
+/* ligne des trois liens légers, sous la photo (remplace la barre des 3 points —
+   retour 2026-10-19), et leurs panneaux juste en dessous, dans le même <ul>.
+   Style d'après objet-list-item.png : un disque jaune posé DERRIÈRE le texte,
+   qui déborde à gauche du mot ; texte en blanc chamois, qui passe en jaune
+   quand le lien est actif — et le disque devient alors blanc. */
+.objet-liens {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0;
+  margin: 1.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.objet-liens > li { display: flex; }
+
 .objet-lien {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  /* la place du disque : il déborde à gauche du texte, comme sur la maquette */
+  padding: 0.45em 0 0.45em 0.62em;
+  margin-right: 1.5rem;
   background: none;
   border: none;
-  border-bottom: 1px solid transparent;
-  padding: 0;
-  font-family: var(--font-titre);
-  font-size: 0.95rem;
-  letter-spacing: 0.08em;
+  font-family: var(--font-corps);
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
   color: var(--ink);
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color 0.15s;
+  isolation: isolate;
 }
-.objet-lien:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* le disque : 3,7 × la hauteur du texte sur la maquette (objet-list-item.png),
+   soit un diamètre qui englobe le mot ; on l'exprime en em pour qu'il suive la
+   taille de la police. Posé derrière (z-index négatif), centré sur la ligne,
+   et débordant à gauche du texte comme sur la maquette. */
+.objet-lien-puce {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3em;
+  height: 3em;
+  margin-top: -1.44em;
+  border-radius: 50%;
+  background: var(--accent);
+  z-index: -1;
+  transition: background-color 0.15s;
+}
+.objet-lien-texte { position: relative; }
+
+/* pas de passage au jaune au survol : le texte deviendrait invisible
+   sur le disque jaune posé derrière. */
+.objet-lien:hover { color: var(--ink); }
+
+/* lien actif : texte jaune, disque blanc */
 .objet-lien.active { color: var(--accent); }
+.objet-lien.active .objet-lien-puce { background: var(--ink); }
+
+/* sur pointeur grossier, pas d'état survol qui reste « collé » */
+@media (hover: none) {
+  .objet-lien:hover { color: var(--ink); }
+}
+
+/* le conteneur des panneaux occupe sa propre ligne, sous les trois liens */
+.objet-panneaux {
+  flex: 0 0 100%;
+  width: 100%;
+  display: block;
+  margin-top: 0;
+}
+
 /* panneaux de contenu sur place (fermés à l'arrivée : le pavé est visible) */
 .objet-panneau {
-  margin-top: 1.2rem;
-  padding-top: 1.2rem;
-  border-top: 1px solid rgba(245, 239, 228, 0.14);
+  margin-top: 1.4rem;
+  max-width: 62ch;
 }
 .objet-panneau h2 {
   font-family: var(--font-titre);
@@ -386,9 +475,11 @@ body {
 @media (max-width: 700px) {
   .objet-layout { grid-template-columns: 1fr; gap: 1.4rem; }
   .objet-col-image { order: -1; }
-  .objet-liens { gap: 1.1rem; }
+  /* écran étroit : les trois liens tiennent sur une rangée malgré les disques
+     qui débordent ; on resserre les marges entre liens. */
+  .objet-liens { margin-top: 1.1rem; }
+  .objet-lien { font-size: 0.92rem; margin-right: 0.6rem; padding-left: 0.5em; }
 }
-
 /* ===== page 2 — missions : texte fixe haut + 4 pavés sur rectangle jaune =====
    (retour client 2026-10-19 : un petit rectangle jaune derrière les pavés,
    qui déborde INÉGALLEMENT et les lie entre eux ; les pavés sont opaques) */
@@ -443,28 +534,41 @@ body {
   }
   .mission-pave { padding: 1.1rem 1.1rem 1rem; }
 }
-/* ===== page 3 — agenda : images en ligne, contenu au clic ===== */
+/* ===== page 3 — agenda : images en ligne, contenu au clic =====
 .agenda-list {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
   margin: 1.5rem 0;
 }
+/* chaque item est une vignette de 160 px ; à l'ouverture il prend TOUTE la
+   largeur de la rangée et le texte se place SOUS l'image.
+   (bug corrigé : le texte en width:320px débordait de la vignette de 160px et
+   sortait de l'écran pour les items de droite) */
 .agenda-item {
   flex: 0 0 auto;
   border: none;
   padding: 0;
   width: 160px;
+  max-width: 100%;
+}
+.agenda-item[open] {
+  flex: 1 0 100%;
+  width: 100%;
 }
 .agenda-item summary {
   list-style: none;
   cursor: pointer;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: 100%;
 }
 .agenda-item summary::-webkit-details-marker { display: none; }
 .agenda-image-frame {
   display: block;
   width: 160px;
   height: 160px;
+  max-width: 100%;
   overflow: hidden;
   border: 3px solid rgba(250, 182, 23, 0.35);
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -484,17 +588,20 @@ body {
 .agenda-info, .agenda-titre, .agenda-meta { display: none; }
 .agenda-contenu {
   display: block;
-  width: 320px;
+  /* jamais plus large que la page : c'est ce qui provoquait le débordement */
+  width: 100%;
+  max-width: 46rem;
   padding: 0.8rem 0;
   line-height: 1.7;
   font-size: 0.92rem;
+  overflow-wrap: break-word;
 }
 .agenda-contenu p { margin: 0 0 0.6rem; }
 
 @media (max-width: 600px) {
   .agenda-item { width: 120px; }
   .agenda-image-frame { width: 120px; height: 120px; }
-  .agenda-contenu { width: 240px; }
+  .agenda-contenu { width: 100%; }
 }
 
 /* ===== page 4 — collection : accordéon mono-ouvert ===== */

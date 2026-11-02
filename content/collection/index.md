@@ -2,8 +2,6 @@
 title: Collection
 ---
 
-<p class="provisoire">Liste des séries de la collection « le commun des mortels ». Cliquez sur un titre pour voir les images de la série (placeholders).</p>
-
 <div class="collection-list">
   <details class="collection-item">
     <summary>Abreuvoir</summary>

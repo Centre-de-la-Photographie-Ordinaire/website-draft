@@ -10,3 +10,61 @@ enableRobustParser = true
   [markup.goldmark]
     [markup.goldmark.renderer]
       unsafe = true
+
+# menu principal (hamburger) — les libellés sont les titres des pages,
+# sans préfixe « page N · » (retour client 2026-10-19).
+
+[[menu.main]]
+  name = "accueil"
+  pageRef = "/"
+  weight = 1
+
+[[menu.main]]
+  name = "objet"
+  pageRef = "/objet"
+  weight = 2
+
+[[menu.main]]
+  name = "missions"
+  pageRef = "/missions"
+  weight = 3
+
+[[menu.main]]
+  name = "agenda"
+  pageRef = "/agenda"
+  weight = 4
+
+[[menu.main]]
+  name = "collection"
+  pageRef = "/collection"
+  weight = 5
+
+[[menu.main]]
+  name = "expositions"
+  pageRef = "/expositions"
+  weight = 6
+
+[[menu.main]]
+  name = "résidences"
+  pageRef = "/residences"
+  weight = 7
+
+[[menu.main]]
+  name = "collecte"
+  pageRef = "/collecte"
+  weight = 8
+
+[[menu.main]]
+  name = "soutien"
+  pageRef = "/soutien"
+  weight = 9
+
+[[menu.main]]
+  name = "fabrique"
+  pageRef = "/fabrique"
+  weight = 10
+
+[[menu.main]]
+  name = "contact"
+  pageRef = "/contact"
+  weight = 11
