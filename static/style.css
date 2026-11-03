@@ -736,8 +736,9 @@ body {
   background: var(--bg);
   padding: 1.3rem 1.6rem 1.2rem;
   margin: 0;
-  width: 270px;
-  height: 480px;
+  /* width/height retirés : le block « missions » plus bas gère
+     la largeur (track de grille) et la hauteur. Un width fixe ici
+     empêchait toute mise à l'échelle responsive. */
   border: 1px solid var(--accent);
 }
 /* The large yellow rectangle behind the cards is not part of the design; it must be removed. */
@@ -746,108 +747,172 @@ body {
 }
 /* === end design-fidelity override === */
 
-/* === design-fidelity override (auto-generated) === */
-/* A+B+C (org-4zy7.6, operator spec):
-   A. thin outline on 3 sides + a THICK bar on one side, offset to overhang a corner
-   B. text stays inside the frame: each card collapses to a summary, click to expand
-   C. the row spans the full container width (reset the original 50rem cap) */
+/* texte lu par les lecteurs d'écran mais invisible (l'icône remplace le libellé) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
+/* === missions — 4 pavés : titre + icône favicon qui bascule sur le détail === */
+/* Espacement généreux entre les pavés (retour opérateur : padding entre les boxes). */
 .missions-jaune {
   display: grid;
+  /* 4 colonnes = disposition de référence ; les paliers plus bas
+     réduisent à 3/2/1 selon la largeur. 70rem de .main plafonne
+     la largeur utile à ~1072px : les colonnes restent donc ≤ 4. */
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 2.2rem;              /* room for the overhanging bars between cards */
-  max-width: none;          /* C: undo .missions-jaune { max-width: 50rem } */
+  /* les gouttières suivent la largeur de la grille, pas celle de la fenêtre
+     (sinon elles gonflent sur grand écran et écrasent les cartes) */
+  gap: clamp(1.2rem, 2.4%, 2.6rem);
+  max-width: none;
   width: 100%;
-  align-items: stretch;    /* all four frames the same height, as in the design */
+  align-items: stretch;    /* les cartes d'une même rangée ont la même hauteur */
   grid-auto-rows: 1fr;
-  margin: 0 0 1.5rem;
+  margin: 0 0 clamp(1.5rem, 3vw, 2rem);
   padding: 0;
   position: relative;
 }
-.missions-jaune::before { content: none; }   /* the old shared yellow rectangle */
+.missions-jaune::before { content: none; }   /* l'ancien rectangle jaune partagé */
 
 .mission-pave {
   position: relative;
   z-index: 1;
-  background: #000;          /* design uses a near-black card interior */
+  background: #000;
   margin: 0;
   padding: 1.2rem 1.4rem 1.1rem;
-  min-width: 0;              /* let text wrap inside the grid track */
+  min-width: 0;
   align-self: stretch;
-  /* Portrait proportion when collapsed; grows with the row when a card is
-     expanded so the list can never spill outside the frame. */
-  min-height: 20rem;
+  /* hauteur fluide : jamais de contenu coupé, la carte grandit avec la rangée */
+  min-height: clamp(15rem, 22vw, 20rem);
   height: auto;
   overflow: visible;
-  border-top: 1px solid var(--accent);
-  border-bottom: 1px solid var(--accent);
-  border-left: 1px solid var(--accent);
-  border-right: 1px solid var(--accent);
+  padding: clamp(1rem, 1.4vw, 1.2rem) clamp(1rem, 1.7vw, 1.4rem) clamp(0.9rem, 1.3vw, 1.1rem);
+  border: 1px solid var(--accent);
+  /* la bascule de couleur est animée, comme le reste du site */
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* --- A: the THICK accent bar ------------------------------------------------
-   One ::after per card, offset vertically so it overhangs a corner. Cards 1-3
-   carry it on the right (card 1 top-aligned, 2-3 bottom-aligned); card 4 on
-   the left. Width comes from the measured design (~11-17px). */
-.mission-pave::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: -0.5rem;            /* sits just outside the thin outline */
-  width: 0.5rem;
-  background: var(--accent);
-  z-index: -1;
-}
-/* Card 1: bar overhangs the TOP-RIGHT corner (starts above, ends above the base). */
-.mission-pave:nth-child(1)::after { top: -1rem; bottom: 10%; }
-/* Cards 2-3: bar overhangs the BOTTOM-RIGHT corner. */
-.mission-pave:nth-child(2)::after,
-.mission-pave:nth-child(3)::after { top: 10%; bottom: -1rem; }
-/* Card 4: mirrored to the LEFT. */
-.mission-pave:nth-child(4)::after {
-  left: -0.5rem; right: auto;
-  top: 10%; bottom: -1rem;
-}
-
-/* --- B: keep the text inside the frame ------------------------------------- */
 .mission-pave h3 {
   font-family: var(--font-titre);
-  font-size: 1.05rem;
+  /* le titre suit la largeur de la carte */
+  font-size: clamp(0.92rem, 1.05vw, 1.05rem);
   font-weight: 600;
   letter-spacing: 0.06em;
   margin: 0 0 0.8em;
   color: var(--ink);
+  transition: color 0.2s ease;
 }
-/* The list becomes a collapsible disclosure: the card shows a teaser and the
-   reader clicks the summary to expand. Native <details>, no JS. */
+
+/* Le <details> ne sert plus qu'à porter l'état « ouvert » (accessible, sans JS).
+   Sa ligne de résumé est remplacée par l'icône favicon. */
 .mission-pave details { margin: 0; }
 .mission-pave details > summary {
   cursor: pointer;
   list-style: none;
-  font-family: var(--font-titre);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink);
-  padding: 0.35rem 0;
-  border-top: 1px solid rgba(245, 239, 228, 0.25);
+  /* l'icône se cale en bas à droite du pavé */
+  position: absolute;
+  right: clamp(0.7rem, 1vw, 1rem);
+  bottom: clamp(0.7rem, 1vw, 1rem);
+  width: clamp(1.6rem, 2.2vw, 2rem);
+  height: clamp(1.6rem, 2.2vw, 2rem);
+  padding: 0;
+  border: 0;
+  /* le texte « Détail des actions » n'est plus affiché (le span .sr-only
+     reste présent pour les lecteurs d'écran) */
+  font-size: 0;
+  line-height: 0;
+  color: transparent;
+  /* le favicon porte son propre liseré anthracite : invisible sur le pavé noir,
+     il ressort en traits sombres sur le pavé jaune. On sur-agrandit l'icône
+     (155%) dans un cadre de 28px centré : le liseré tombe hors du cadre rogné
+     et il ne reste que le carré jaune + le disque anthracite. */
+  background: url("favicon.png") center / 155% no-repeat;
+  overflow: hidden;
+  opacity: 0.9;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 .mission-pave details > summary::-webkit-details-marker { display: none; }
-.mission-pave details > summary::after { content: " +"; color: var(--accent); }
-.mission-pave details[open] > summary::after { content: " –"; }
-.mission-pave details ul {
-  margin: 0.6rem 0 0;
-  padding-left: 1.1rem;
-  display: grid;
-  gap: 0.35rem;
+.mission-pave details > summary:hover,
+.mission-pave details > summary:focus-visible {
+  opacity: 1;
+  transform: scale(1.08);
+  outline: none;
 }
-.mission-pave li { line-height: 1.5; font-size: 0.92rem; }
-.mission-pave li::marker { color: var(--accent); }
+/* focus clavier visible malgré l'icône-image */
+.mission-pave details > summary:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent);
+  border-radius: 2px;
+}
 
-@media (max-width: 900px) {
-  .missions-jaune { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* --- état basculé : le détail REMPLACE le contenu du pavé ----------------
+   Contenu normal (h3) masqué, liste affichée, fond jaune, texte noir. */
+.mission-pave:has(details[open]) {
+  background: var(--accent);
+}
+.mission-pave:has(details[open]) h3 {
+  display: none;
+}
+.mission-pave:has(details[open]) h3,
+.mission-pave:has(details[open]) details,
+.mission-pave:has(details[open]) li {
+  color: #000;
+}
+
+.mission-pave details ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+  /* la liste occupe le pavé, sans passer sous l'icône (réserve proportionnée à l'icône) */
+  padding-bottom: clamp(1.8rem, 2.4vw, 2.2rem);
+}
+.mission-pave li {
+  line-height: 1.5;
+  font-size: clamp(0.85rem, 0.95vw, 0.92rem);
+  color: var(--ink);
+  /* list-style retiré plus haut : la puce devient un filet vertical discret */
+  padding-left: 0.7rem;
+  border-left: 2px solid rgba(250, 182, 23, 0.45);
+  transition: color 0.2s ease;
+}
+.mission-pave li::marker { color: var(--accent); }
+.mission-pave:has(details[open]) li::marker { color: #000; }
+/* pavé basculé : pas de filet vertical sur les items */
+.mission-pave:has(details[open]) li { border-left: 0; padding-left: 0; }
+
+/* repli sans :has() : la liste reste lisible (noir sur jaune non garanti,
+   mais le contenu s'affiche quand même) */
+.mission-pave details[open] ul { color: inherit; }
+
+/* --- paliers : 4 → 3 → 2 → 1 colonnes ----------------------------------
+   Seuils choisis pour que la carte ne descende jamais sous ~190px de
+   contenu utile (au-delà, les titres se cassent mot à mot). */
+@media (max-width: 1180px) {
+  .missions-jaune { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .mission-pave h3 { font-size: 1rem; }
+}
+@media (max-width: 780px) {
+  .missions-jaune { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.6rem; }
+  .mission-pave { min-height: 13rem; }
+  .mission-pave h3,
+  .mission-pave li { font-size: 0.94rem; }
 }
 @media (max-width: 560px) {
-  .missions-jaune { grid-template-columns: minmax(0, 1fr); }
+  .missions-jaune { grid-template-columns: minmax(0, 1fr); gap: 1.3rem; }
+  .mission-pave { min-height: 0; padding: 1.1rem 1.1rem 1rem; }
+  .mission-pave details ul { padding-bottom: 2.1rem; }
 }
-/* === end design-fidelity override === */
+@media (max-width: 380px) {
+  .mission-pave { padding: 0.9rem 0.9rem 0.85rem; }
+  .mission-pave h3,
+  .mission-pave li { font-size: 0.9rem; }
+}
+/* === end missions === */

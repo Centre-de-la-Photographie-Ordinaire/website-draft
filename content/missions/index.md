@@ -11,7 +11,7 @@ title: Les missions
   <div class="mission-pave">
     <h3>1 · Collecter et sauvegarder les photographies ordinaires, dévoiler la dimension patrimoniale de la collection</h3>
     <details>
-      <summary>Détail des actions</summary>
+      <summary><span class="sr-only">Détail des actions</span></summary>
       <ul>
       <li>Collecte permanente de photos, sans hiérarchie esthétique</li>
       <li>Tri, classement et conservation de la collection</li>
@@ -24,7 +24,7 @@ title: Les missions
   <div class="mission-pave">
     <h3>2 · Accueillir des artistes contemporains, faire dialoguer création actuelle et photographie ordinaire d'hier et d'aujourd'hui</h3>
     <details>
-      <summary>Détail des actions</summary>
+      <summary><span class="sr-only">Détail des actions</span></summary>
       <ul>
       <li>Accueil en résidence d'artistes et de commissaires d'exposition</li>
       <li>Production et diffusion des œuvres</li>
@@ -37,7 +37,7 @@ title: Les missions
   <div class="mission-pave">
     <h3>3 · Exercer le regard, penser et dire ce que l'on voit</h3>
     <details>
-      <summary>Détail des actions</summary>
+      <summary><span class="sr-only">Détail des actions</span></summary>
       <ul>
       <li>Ateliers d'observation, de classement, de description de photographies</li>
       <li>Interventions sur la photographie, la mémoire, la transmission</li>
@@ -50,7 +50,7 @@ title: Les missions
   <div class="mission-pave">
     <h3>4 · Partager des savoir-faire et accompagner la mise en forme d'archives</h3>
     <details>
-      <summary>Détail des actions</summary>
+      <summary><span class="sr-only">Détail des actions</span></summary>
       <ul>
       <li>Ateliers d'apprentissage de pratiques photographiques</li>
       <li>Accompagnement de familles dans la mise en forme et la transmission de mémoires visuelles</li>
