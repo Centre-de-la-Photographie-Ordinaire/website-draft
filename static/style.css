@@ -871,46 +871,96 @@ body {
 }
 
 /* Le <details> ne sert plus qu'à porter l'état « ouvert » (accessible, sans JS).
-   Sa ligne de résumé est remplacée par l'icône favicon. */
+   On masque sa ligne de résumé : c'est le bouton .btn-primary qui pilote. */
 .mission-pave details { margin: 0; }
-.mission-pave details > summary {
-  cursor: pointer;
-  list-style: none;
-  /* l'icône se cale en bas à droite du pavé */
-  position: absolute;
-  right: clamp(0.7rem, 1vw, 1rem);
-  bottom: clamp(0.7rem, 1vw, 1rem);
-  width: clamp(1.6rem, 2.2vw, 2rem);
-  height: clamp(1.6rem, 2.2vw, 2rem);
-  padding: 0;
-  border: 0;
-  /* le texte « Détail des actions » n'est plus affiché (le span .sr-only
-     reste présent pour les lecteurs d'écran) */
-  font-size: 0;
-  line-height: 0;
-  color: transparent;
-  /* le favicon porte son propre liseré anthracite : invisible sur le pavé noir,
-     il ressort en traits sombres sur le pavé jaune. On sur-agrandit l'icône
-     (155%) dans un cadre de 28px centré : le liseré tombe hors du cadre rogné
-     et il ne reste que le carré jaune + le disque anthracite. */
-  background: url("favicon.png") center / 155% no-repeat;
+.mission-pave .card-summary { display: none; }
+
+/* ===== vocabulaire de carte Bootstrap 5.1 (components/card) ==============
+   Le site n'importe pas le CSS Bootstrap : on reprend les noms de classes
+   (.card, .card-body, .card-title, .card-text, .btn, .btn-primary) et on les
+   habille avec la charte (fond noir, filet jaune, fonte DINdong). */
+.mission-pave.card {
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  border: 1px solid var(--accent);
+  border-radius: 0;            /* angles vifs, comme le reste du site */
   overflow: hidden;
-  opacity: 0.9;
-  transition: opacity 0.15s ease, transform 0.15s ease;
 }
-.mission-pave details > summary::-webkit-details-marker { display: none; }
-.mission-pave details > summary:hover,
-.mission-pave details > summary:focus-visible {
-  opacity: 1;
-  transform: scale(1.08);
+.mission-pave .card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  flex: 1 1 auto;
+  padding: 0;                  /* le padding est porté par .mission-pave */
+}
+.mission-pave .card-title {
+  font-family: var(--font-titre);
+  font-size: clamp(0.92rem, 1.05vw, 1.05rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  margin: 0;
+  color: var(--ink);
+  transition: color 0.2s ease;
+}
+.mission-pave .card-text { min-width: 0; }
+
+/* --- bouton : .btn.btn-primary de Bootstrap, aux couleurs de la charte ----- */
+.mission-pave .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  font-family: var(--font-corps);
+  font-size: 0.85rem;
+  line-height: 1;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  border-radius: 0;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+.mission-pave .btn-primary {
+  /* le bouton se cale en bas à droite du pavé */
+  align-self: flex-end;
+  margin-top: auto;
+  padding: 0.5em 0.9em;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+  /* libellé lisible par les lecteurs d'écran, mais le bouton reste compact :
+     le texte visible est le chevron */
+  text-indent: -9999px;
+  overflow: hidden;
+  width: clamp(2rem, 2.6vw, 2.4rem);
+  height: clamp(2rem, 2.6vw, 2.4rem);
+  padding: 0;
+  position: relative;
+}
+.mission-pave .btn-primary::after {
+  content: "›";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-indent: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.mission-pave .btn-primary:hover,
+.mission-pave .btn-primary:focus-visible {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #000;
   outline: none;
 }
-/* focus clavier visible malgré l'icône-image */
-.mission-pave details > summary:focus-visible {
-  box-shadow: 0 0 0 2px var(--accent);
-  border-radius: 2px;
-}
+.mission-pave .btn-primary:focus-visible { box-shadow: 0 0 0 2px var(--ink); }
 
+/* --- état basculé ------------------------------------------------------- */
 /* --- état basculé : le détail REMPLACE le contenu du pavé ----------------
    Contenu normal (h3) masqué, liste affichée, fond jaune, texte noir. */
 .mission-pave:has(details[open]) {
@@ -968,7 +1018,6 @@ body {
 @media (max-width: 560px) {
   .missions-jaune { grid-template-columns: minmax(0, 1fr); gap: 1.3rem; }
   .mission-pave { min-height: 0; padding: 1.1rem 1.1rem 1rem; }
-  .mission-pave details ul { padding-bottom: 2.1rem; }
 }
 @media (max-width: 380px) {
   .mission-pave { padding: 0.9rem 0.9rem 0.85rem; }
