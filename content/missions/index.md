@@ -115,8 +115,8 @@ title: Les missions
 
 <script>
 /* missions — chaque carte se RETOURNE entre deux faces.
-   Face avant : titre + bouton .btn-primary « détail » → retourne la carte.
-   Face arrière : liste des actions + bouton .btn-primary « retour » → re-retourne.
+   Face avant : titre + bouton-favicon (.btn-primary.btn-favicon) → retourne la carte.
+   Face arrière : liste des actions + bouton-favicon de retour → re-retourne.
    L'état vit dans la classe .est-retournee ; aria-expanded suit l'état, et la
    face inactive est rendue inerte (clavier + lecteurs d'écran). */
 (function () {

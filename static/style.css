@@ -1054,14 +1054,6 @@ body {
   outline: none;
 }
 .mission-pave .btn-primary:not(.btn-favicon):focus-visible { box-shadow: 0 0 0 2px var(--accent); }
-.mission-pave .btn-chevron {
-  font-size: 1.05rem;
-  font-weight: 700;
-  line-height: 1;
-  display: inline-block;
-  transition: transform 0.2s ease;
-}
-.mission-pave .btn-primary:hover .btn-chevron { transform: translateX(0.15em); }
 
 /* --- bouton-favicon : survol et focus --------------------------------
    Placé APRÈS les règles .btn-primary pour gagner la cascade. Seuls
@@ -1090,21 +1082,9 @@ body {
   margin: 0;
   color: rgba(0, 0, 0, 0.62);
 }
-/* la carte retournée garde son bouton en bas, en filet noir sur jaune */
-.mission-face-arriere .btn-primary {
-  background: #000;
-  border-color: #000;
-  color: var(--accent);
-}
-.mission-face-arriere .btn-primary:hover,
-.mission-face-arriere .btn-primary:focus-visible {
-  box-shadow: none;
-}
-.mission-face-arriere .btn-primary:focus-visible { box-shadow: 0 0 0 2px #000; }
-
 /* --- bouton-favicon de la face ARRIÈRE (retour vers la face avant) --------
    Même icône que la face avant, alignée à droite : le geste est le même dans
-   les deux sens, seul le sens du chevron changeait avant. */
+   les deux sens. */
 .mission-face-arriere .btn-favicon {
   width: clamp(1.9rem, 2.4vw, 2.2rem);
   height: clamp(1.9rem, 2.4vw, 2.2rem);
@@ -1134,7 +1114,6 @@ body {
   outline: none;
 }
 .mission-face-arriere .btn-favicon:focus-visible { box-shadow: 0 0 0 2px #000; }
-.mission-face-arriere .btn-chevron { transform: rotate(180deg); }
 
 /* liens optionnels de la face arrière (ils ouvrent le <dialog> haut-droite) */
 .mission-liens { margin: 0; }
