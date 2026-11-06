@@ -439,35 +439,95 @@ body {
   .objet-lien:hover { color: var(--ink); }
 }
 
-/* le conteneur des panneaux occupe sa propre ligne, sous les trois liens */
-.objet-panneaux {
-  flex: 0 0 100%;
-  width: 100%;
-  display: block;
-  margin-top: 0;
+/* ===== dialog des trois liens « objet » ================================
+   <dialog> natif du modèle components/dialog : ouvert en modal par
+   showModal(), il est positionné FIXEMENT EN HAUT À DROITE du viewport.
+   Fond jaune de la charte, texte noir (contraste demandé par le client).  */
+.objet-dialog {
+  /* reset du centrage par défaut du <dialog> modal */
+  position: fixed;
+  inset: 0.9rem 0.9rem auto auto;   /* haut 0.9 · droite 0.9 */
+  margin: 0;
+  width: min(30rem, calc(100vw - 1.8rem));
+  max-width: none;
+  max-height: min(85vh, calc(100vh - 1.8rem));
+  padding: 0;
+  overflow: auto;
+  background: var(--accent);
+  color: #000;
+  border: 1px solid #000;
+  font-family: var(--font-corps);
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
-
-/* panneaux de contenu sur place (fermés à l'arrivée : le pavé est visible) */
-.objet-panneau {
-  margin-top: 1.4rem;
-  max-width: 62ch;
+/* le fond assombri derrière le dialog (pseudo-élément natif) */
+.objet-dialog::backdrop {
+  background: rgba(20, 23, 26, 0.66);
 }
-.objet-panneau h2 {
+.objet-dialog[open] { animation: objet-dialog-in 0.18s ease-out; }
+@keyframes objet-dialog-in {
+  from { opacity: 0; transform: translateY(-0.4rem); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .objet-dialog[open] { animation: none; }
+}
+.objet-dialog-entete {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.9rem 1rem 0.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+}
+/* le titre doit rester noir : .main h2 (jaune) est plus spécifique que la
+   classe seule, d'où le double sélecteur imbriqué. */
+.objet-dialog .objet-dialog-titre,
+.objet-dialog h2.objet-dialog-titre {
   font-family: var(--font-titre);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.22em;
   text-transform: lowercase;
-  margin: 0 0 0.8em;
-  color: var(--accent);
+  margin: 0;
+  color: #000;
 }
-.objet-panneau blockquote {
-  border-left: 2px solid var(--accent);
+.objet-dialog-fermer {
+  flex-shrink: 0;
+  width: 1.9rem;
+  height: 1.9rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: none;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  color: #000;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+.objet-dialog-fermer:hover,
+.objet-dialog-fermer:focus-visible {
+  background: #000;
+  color: var(--accent);
+  outline: none;
+}
+.objet-dialog-corps { padding: 0.8rem 1rem 1.1rem; }
+.objet-dialog-corps p { margin: 0 0 0.8em; }
+.objet-dialog-corps p:last-child { margin-bottom: 0; }
+.objet-dialog-corps a { color: #000; text-decoration: underline; text-underline-offset: 0.15em; }
+.objet-dialog-corps a:hover { background: #000; color: var(--accent); }
+.objet-dialog-corps .provisoire { font-size: 0.85rem; font-style: italic; opacity: 0.75; }
+.objet-dialog-corps blockquote {
+  border-left: 2px solid #000;
   margin: 0.9rem 0;
   padding-left: 1rem;
-  color: var(--dim);
   font-style: italic;
+  color: rgba(0, 0, 0, 0.75);
 }
+.objet-dialog-corps figcaption { font-size: 0.82rem; color: rgba(0, 0, 0, 0.7); }
+.objet-dialog-corps .video-cadre { border: 1px dashed rgba(0, 0, 0, 0.45); }
+
 .objet-col-image { margin: 0; }
 .objet-image-principale { margin: 0; }
 .objet-image-principale img { width: 100%; height: auto; display: block; }
