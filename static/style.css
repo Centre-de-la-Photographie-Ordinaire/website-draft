@@ -519,7 +519,6 @@ body {
 .objet-dialog-corps p:last-child { margin-bottom: 0; }
 .objet-dialog-corps a { color: #000; text-decoration: underline; text-underline-offset: 0.15em; }
 .objet-dialog-corps a:hover { background: #000; color: var(--accent); }
-.objet-dialog-corps .provisoire { font-size: 0.85rem; font-style: italic; opacity: 0.75; }
 .objet-dialog-corps blockquote {
   border-left: 2px solid #000;
   margin: 0.9rem 0;
