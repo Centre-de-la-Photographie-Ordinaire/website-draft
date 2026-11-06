@@ -19,71 +19,64 @@ sansTitre: true
 </figure>
 
 <ul class="objet-liens">
-<li><button type="button" class="objet-lien" data-panneau="panneau-interview" aria-expanded="false" aria-controls="panneau-interview"><span class="objet-lien-puce" aria-hidden="true"></span><span class="objet-lien-texte">interview</span></button></li>
-<li><button type="button" class="objet-lien" data-panneau="panneau-collection" aria-expanded="false" aria-controls="panneau-collection"><span class="objet-lien-puce" aria-hidden="true"></span><span class="objet-lien-texte">la collection</span></button></li>
-<li><button type="button" class="objet-lien" data-panneau="panneau-ordinaire" aria-expanded="false" aria-controls="panneau-ordinaire"><span class="objet-lien-puce" aria-hidden="true"></span><span class="objet-lien-texte">l'ordinaire</span></button></li>
+<li><button type="button" class="objet-lien" data-dialog="panneau-interview" aria-expanded="false" aria-controls="panneau-interview"><span class="objet-lien-puce" aria-hidden="true"></span><span class="objet-lien-texte">interview</span></button></li>
+<li><button type="button" class="objet-lien" data-dialog="panneau-collection" aria-expanded="false" aria-controls="panneau-collection"><span class="objet-lien-puce" aria-hidden="true"></span><span class="objet-lien-texte">la collection</span></button></li>
+<li><button type="button" class="objet-lien" data-dialog="panneau-ordinaire" aria-expanded="false" aria-controls="panneau-ordinaire"><span class="objet-lien-puce" aria-hidden="true"></span><span class="objet-lien-texte">l'ordinaire</span></button></li>
 
-<li class="objet-panneaux">
-
-<div class="objet-panneau" id="panneau-interview" hidden>
-<h2>vidéo d'interview</h2>
-<p class="provisoire">vidéo à venir : aucun fichier disponible pour l'instant (bead org-9s8.3)</p>
-<figure class="video-ph">
-<div class="video-cadre" role="img" aria-label="emplacement de la vidéo d'interview">▶</div>
-<figcaption>vidéo d'interview : fichier à recevoir, puis intégré ici (lecture locale, pas de plateforme tierce si possible)</figcaption>
-</figure>
-</div>
-
-<div class="objet-panneau" id="panneau-collection" hidden>
-<h2>l'histoire de la collection</h2>
-<p class="provisoire">contenu provisoire : à valider avec le centre (bead org-9s8.3)</p>
-<p>La collection naît d'une collection privée, portée par Élise Pic. Elle est aujourd'hui confiée à une association qui œuvre à sa sauvegarde et à sa mise en valeur, et s'ouvre au fonds de donation : les familles peuvent confier leurs photographies pour qu'elles rejoignent le commun des mortels.</p>
-<p>La liste des séries : <a href="{{< rel "collection/" >}}">page 4 · collection →</a></p>
-<blockquote>Question en attente de réponse du centre (suivi dans le bead org-9s8.8) : faut-il présenter ici la structure administrative du centre (statut, gouvernance, modalités de donation) ?</blockquote>
-</div>
-
-<div class="objet-panneau" id="panneau-ordinaire" hidden>
-<h2>le sens de notre travail sur l'ordinaire</h2>
-<p class="provisoire">contenu provisoire : texte définitif à venir (bead org-9s8.3)</p>
-<p>Le « commun des mortels » rassemble des photographies sans auteur connu, prises par et pour des familles. Notre travail consiste à donner leur place à ces images devenues anonymes : les sauvegarder, les classer en thèmes, les exposer.</p>
-<p>L'ordinaire photographié (les repas, les fêtes, les vacances, les jardins) est une archive de la vie courante. Le centre s'attache à montrer ce que ces 3 000 000 d'images disent de nous, et à changer notre rapport aux photographies que personne n'a « faites pour l'histoire ».</p>
-</div>
-
-</li>
 </ul>
 </div>
 </div>
 
-<script>
-/* objet — trois liens légers (remplacent la barre des 3 points) :
-   clic sur un lien → son panneau s'ouvre juste en dessous (dans le même <ul>) ;
-   re-clic ou autre lien → referme.
-   En arrivant : tous les panneaux sont fermés, c'est le visiteur qui clique. */
-(function () {
-var liens = Array.prototype.slice.call(document.querySelectorAll('.objet-lien'));
-var panneaux = Array.prototype.slice.call(document.querySelectorAll('.objet-panneau'));
+<!-- Les trois « panneaux » sont des <dialog> natifs (cf. components/dialog, v6) :
+     fond jaune de la charte, texte noir, positionnés en haut à droite du
+     viewport. Le JS en bas de page les ouvre en modal (showModal()) : Échap,
+     clic sur le fond et retour du focus au déclencheur sont natifs. -->
+<dialog class="objet-dialog objet-dialog-video" id="panneau-interview" aria-labelledby="panneau-interview-titre">
+<div class="objet-dialog-entete">
+<h2 class="objet-dialog-titre" id="panneau-interview-titre">vidéo d'interview</h2>
+<div class="objet-dialog-actions">
+<button type="button" class="objet-dialog-agrandir" data-dialog-agrandir aria-pressed="false" aria-label="Agrandir la vidéo" title="Agrandir la vidéo"><span class="objet-dialog-agrandir-ico" aria-hidden="true">&#9974;</span></button>
+<button type="button" class="objet-dialog-fermer" data-dialog-close aria-label="Fermer">&times;</button>
+</div>
+</div>
+<div class="objet-dialog-corps">
+<figure class="video-ph">
+<div class="video-cadre">
+<video class="video-interview" id="video-interview" controls preload="none" playsinline
+ data-src="{{< rel "videos/interview-extrait.mp4" >}}"
+ poster="{{< rel "images/interview-poster.jpg" >}}"
+ width="1280" height="720" aria-label="Interview de Jacques et Élise, extrait de 44 secondes">
+Votre navigateur ne sait pas lire les vidéos au format MP4.
+<a href="{{< rel "videos/interview-extrait.mp4" >}}">Télécharger l'extrait (.mp4, 9 Mo)</a>
+</video>
+</div>
+<figcaption>extrait de l'interview — 44 secondes. La vidéo complète (14 min) sera intégrée une fois validée.</figcaption>
+</figure>
+</div>
+</dialog>
 
-function closeAll() {
-panneaux.forEach(function (p) { p.hidden = true; });
-liens.forEach(function (l) { l.classList.remove('active'); l.setAttribute('aria-expanded', 'false'); });
-}
+<dialog class="objet-dialog" id="panneau-collection" aria-labelledby="panneau-collection-titre">
+<div class="objet-dialog-entete">
+<h2 class="objet-dialog-titre" id="panneau-collection-titre">l'histoire de la collection</h2>
+<button type="button" class="objet-dialog-fermer" data-dialog-close aria-label="Fermer">&times;</button>
+</div>
+<div class="objet-dialog-corps">
+<p>La collection naît d'une collection privée, portée par Élise Pic. Elle est aujourd'hui confiée à une association qui œuvre à sa sauvegarde et à sa mise en valeur, et s'ouvre au fonds de donation : les familles peuvent confier leurs photographies pour qu'elles rejoignent le commun des mortels.</p>
+<p>La liste des séries : <a href="{{< rel "collection/" >}}">page 4 · collection →</a></p>
+<blockquote>Question en attente de réponse du centre (suivi dans le bead org-9s8.8) : faut-il présenter ici la structure administrative du centre (statut, gouvernance, modalités de donation) ?</blockquote>
+</div>
+</dialog>
 
-liens.forEach(function (lien) {
-lien.addEventListener('click', function () {
-var panneau = document.getElementById(lien.dataset.panneau);
-if (!panneau) return;
-var etaitOuvert = !panneau.hidden;
-closeAll();
-if (!etaitOuvert) {
-panneau.hidden = false;
-lien.classList.add('active');
-lien.setAttribute('aria-expanded', 'true');
-}
-});
-});
+<dialog class="objet-dialog" id="panneau-ordinaire" aria-labelledby="panneau-ordinaire-titre">
+<div class="objet-dialog-entete">
+<h2 class="objet-dialog-titre" id="panneau-ordinaire-titre">le sens de notre travail sur l'ordinaire</h2>
+<button type="button" class="objet-dialog-fermer" data-dialog-close aria-label="Fermer">&times;</button>
+</div>
+<div class="objet-dialog-corps">
+<p>Le « commun des mortels » rassemble des photographies sans auteur connu, prises par et pour des familles. Notre travail consiste à donner leur place à ces images devenues anonymes : les sauvegarder, les classer en thèmes, les exposer.</p>
+<p>L'ordinaire photographié (les repas, les fêtes, les vacances, les jardins) est une archive de la vie courante. Le centre s'attache à montrer ce que ces 3 000 000 d'images disent de nous, et à changer notre rapport aux photographies que personne n'a « faites pour l'histoire ».</p>
+</div>
+</dialog>
 
-document.addEventListener('keydown', function (e) {
-if (e.key === 'Escape') closeAll();
-});
-})();
-</script>
+
+{{< dialog-script >}}
