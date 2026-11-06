@@ -577,23 +577,6 @@ body {
   margin: 0 0 0.8em;
   color: var(--ink);
 }
-.mission-pave ul {
-  margin: 0;
-  padding-left: 1.15rem;
-  display: grid;
-  gap: 0.35rem;
-}
-.mission-pave li {
-  line-height: 1.55;
-  font-size: 0.95rem;
-}
-.mission-pave li::marker { color: var(--accent); }
-@media (max-width: 700px) {
-  .missions-jaune::before {
-    top: -10px; left: -8px; right: 12px; bottom: -8px; /* débordé réduit sur mobile */
-  }
-  .mission-pave { padding: 1.1rem 1.1rem 1rem; }
-}
 /* ===== page 3 — agenda : images en ligne, contenu au clic =====
 .agenda-list {
   display: flex;
@@ -820,20 +803,20 @@ body {
   border: 0;
 }
 
-/* === missions — 4 pavés : titre + icône favicon qui bascule sur le détail === */
-/* Espacement généreux entre les pavés (retour opérateur : padding entre les boxes). */
+/* === missions — 4 cartes qui se RETOURNENT (flip 3D) ===================
+   Face avant : titre (card-title) + bouton .btn-primary « détail ».
+   Face arrière : la liste des actions + un bouton .btn-primary « retour ».
+   L'état est porté par la classe .est-retournee sur .mission-pave, pilotée
+   par le JS en bas de content/missions/index.md (aria-expanded à jour). */
+
 .missions-jaune {
   display: grid;
-  /* 4 colonnes = disposition de référence ; les paliers plus bas
-     réduisent à 3/2/1 selon la largeur. 70rem de .main plafonne
-     la largeur utile à ~1072px : les colonnes restent donc ≤ 4. */
+  /* 4 colonnes = disposition de référence ; paliers 3/2/1 plus bas. */
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  /* les gouttières suivent la largeur de la grille, pas celle de la fenêtre
-     (sinon elles gonflent sur grand écran et écrasent les cartes) */
   gap: clamp(1.2rem, 2.4%, 2.6rem);
   max-width: none;
   width: 100%;
-  align-items: stretch;    /* les cartes d'une même rangée ont la même hauteur */
+  align-items: stretch;    /* les cartes d'une rangée ont la même hauteur */
   grid-auto-rows: 1fr;
   margin: 0 0 clamp(1.5rem, 3vw, 2rem);
   padding: 0;
@@ -841,58 +824,79 @@ body {
 }
 .missions-jaune::before { content: none; }   /* l'ancien rectangle jaune partagé */
 
+/* --- la carte : conteneur de perspective + hauteur fluide ---------------- */
 .mission-pave {
   position: relative;
   z-index: 1;
-  background: #000;
   margin: 0;
-  padding: 1.2rem 1.4rem 1.1rem;
+  padding: 0;
   min-width: 0;
   align-self: stretch;
-  /* hauteur fluide : jamais de contenu coupé, la carte grandit avec la rangée */
   min-height: clamp(15rem, 22vw, 20rem);
   height: auto;
   overflow: visible;
-  padding: clamp(1rem, 1.4vw, 1.2rem) clamp(1rem, 1.7vw, 1.4rem) clamp(0.9rem, 1.3vw, 1.1rem);
   border: 1px solid var(--accent);
-  /* la bascule de couleur est animée, comme le reste du site */
-  transition: background-color 0.2s ease, color 0.2s ease;
+  background: #000;
+  /* la perspective est portée par la carte, la rotation par l'intérieur */
+  perspective: 1200px;
 }
 
-.mission-pave h3 {
-  font-family: var(--font-titre);
-  /* le titre suit la largeur de la carte */
-  font-size: clamp(0.92rem, 1.05vw, 1.05rem);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  margin: 0 0 0.8em;
-  color: var(--ink);
-  transition: color 0.2s ease;
+/* l'intérieur tourne ; ses deux faces sont superposées.
+   Il remplit la hauteur de la rangée de grille (le contenu de la face avant
+   ne suffit pas à la définir). */
+.mission-interieur {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4, 0.05, 0.2, 1);
+}
+.mission-pave.est-retournee .mission-interieur {
+  transform: rotateY(180deg);
+}
+/* pendant la rotation, la face cachée ne doit pas transparaître en miroir */
+.mission-interieur { transition: transform 0.55s cubic-bezier(0.4, 0.05, 0.2, 1); }
+.mission-pave .mission-face-arriere { backface-visibility: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  .mission-interieur { transition: none; }
 }
 
-/* Le <details> ne sert plus qu'à porter l'état « ouvert » (accessible, sans JS).
-   On masque sa ligne de résumé : c'est le bouton .btn-primary qui pilote. */
-.mission-pave details { margin: 0; }
-.mission-pave .card-summary { display: none; }
-
-/* ===== vocabulaire de carte Bootstrap 5.1 (components/card) ==============
-   Le site n'importe pas le CSS Bootstrap : on reprend les noms de classes
-   (.card, .card-body, .card-title, .card-text, .btn, .btn-primary) et on les
-   habille avec la charte (fond noir, filet jaune, fonte DINdong). */
-.mission-pave.card {
+/* --- une face ------------------------------------------------------------ */
+.mission-face {
+  /* chaque face occupe toute la carte */
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   display: flex;
   flex-direction: column;
   background: #000;
-  border: 1px solid var(--accent);
-  border-radius: 0;            /* angles vifs, comme le reste du site */
-  overflow: hidden;
+  padding: clamp(1rem, 1.4vw, 1.2rem) clamp(1rem, 1.7vw, 1.4rem) clamp(0.9rem, 1.3vw, 1.1rem);
+  overflow: hidden;        /* le défilement est porté par .card-text */
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
+.mission-face-avant {
+  transform: rotateY(0deg);
+}
+.mission-face-arriere {
+  transform: rotateY(180deg);
+  /* fond jaune, texte noir : la face arrière reprend le contraste
+     noir sur jaune demandé pour les panneaux de la page objet */
+  background: var(--accent);
+  color: #000;
+}
+
+/* --- contenu des faces (vocabulaire card Bootstrap 5.1) ------------------ */
 .mission-pave .card-body {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.7rem;
+  /* la chaîne flex doit remplir la face pour que margin-top:auto du bouton
+     le colle réellement en bas */
   flex: 1 1 auto;
-  padding: 0;                  /* le padding est porté par .mission-pave */
+  min-height: 0;
+  padding: 0;
 }
 .mission-pave .card-title {
   font-family: var(--font-titre);
@@ -902,19 +906,25 @@ body {
   line-height: 1.35;
   margin: 0;
   color: var(--ink);
-  transition: color 0.2s ease;
 }
-.mission-pave .card-text { min-width: 0; }
+.mission-pave .card-text {
+  min-width: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;          /* liste longue : seul le texte défile */
+  /* filet de défilement discret, dans les couleurs de la charte */
+  scrollbar-width: thin;
+}
 
-/* --- bouton : .btn.btn-primary de Bootstrap, aux couleurs de la charte ----- */
 .mission-pave .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4em;
+  gap: 0.35em;
   font-family: var(--font-corps);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   line-height: 1;
+  letter-spacing: 0.02em;
   text-decoration: none;
   text-align: center;
   cursor: pointer;
@@ -924,32 +934,13 @@ body {
   transition: background-color 0.15s, color 0.15s, border-color 0.15s;
 }
 .mission-pave .btn-primary {
-  /* le bouton se cale en bas à droite du pavé */
-  align-self: flex-end;
+  align-self: flex-start;   /* calé à gauche sous le titre */
+  flex: 0 0 auto;
   margin-top: auto;
-  padding: 0.5em 0.9em;
+  padding: 0.55em 0.85em;
   background: var(--accent);
   border-color: var(--accent);
   color: #000;
-  /* libellé lisible par les lecteurs d'écran, mais le bouton reste compact :
-     le texte visible est le chevron */
-  text-indent: -9999px;
-  overflow: hidden;
-  width: clamp(2rem, 2.6vw, 2.4rem);
-  height: clamp(2rem, 2.6vw, 2.4rem);
-  padding: 0;
-  position: relative;
-}
-.mission-pave .btn-primary::after {
-  content: "›";
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  text-indent: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  line-height: 1;
 }
 .mission-pave .btn-primary:hover,
 .mission-pave .btn-primary:focus-visible {
@@ -958,70 +949,79 @@ body {
   color: #000;
   outline: none;
 }
-.mission-pave .btn-primary:focus-visible { box-shadow: 0 0 0 2px var(--ink); }
+.mission-pave .btn-primary:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+.mission-pave .btn-chevron {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.mission-pave .btn-primary:hover .btn-chevron { transform: translateX(0.15em); }
 
-/* --- état basculé ------------------------------------------------------- */
-/* --- état basculé : le détail REMPLACE le contenu du pavé ----------------
-   Contenu normal (h3) masqué, liste affichée, fond jaune, texte noir. */
-.mission-pave:has(details[open]) {
-  background: var(--accent);
+/* --- contenu de la face arrière ----------------------------------------- */
+.mission-retour-titre {
+  font-family: var(--font-titre);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: lowercase;
+  margin: 0;
+  color: rgba(0, 0, 0, 0.62);
 }
-.mission-pave:has(details[open]) h3 {
-  display: none;
+/* la carte retournée garde son bouton en bas, en filet noir sur jaune */
+.mission-face-arriere .btn-primary {
+  background: #000;
+  border-color: #000;
+  color: var(--accent);
 }
-.mission-pave:has(details[open]) h3,
-.mission-pave:has(details[open]) details,
-.mission-pave:has(details[open]) li {
+.mission-face-arriere .btn-primary:hover,
+.mission-face-arriere .btn-primary:focus-visible {
+  background: transparent;
+  border-color: #000;
   color: #000;
+  box-shadow: none;
 }
+.mission-face-arriere .btn-primary:focus-visible { box-shadow: 0 0 0 2px #000; }
+.mission-face-arriere .btn-chevron { transform: rotate(180deg); }
 
-.mission-pave details ul {
+.mission-face-arriere ul {
   margin: 0;
   padding-left: 0;
   list-style: none;
   display: grid;
   gap: 0.45rem;
-  /* la liste occupe le pavé, sans passer sous l'icône (réserve proportionnée à l'icône) */
-  padding-bottom: clamp(1.8rem, 2.4vw, 2.2rem);
 }
-.mission-pave li {
+.mission-face-arriere li {
   line-height: 1.5;
   font-size: clamp(0.85rem, 0.95vw, 0.92rem);
-  color: var(--ink);
-  /* list-style retiré plus haut : la puce devient un filet vertical discret */
+  color: inherit;
   padding-left: 0.7rem;
-  border-left: 2px solid rgba(250, 182, 23, 0.45);
-  transition: color 0.2s ease;
+  border-left: 2px solid rgba(0, 0, 0, 0.3);
 }
-.mission-pave li::marker { color: var(--accent); }
-.mission-pave:has(details[open]) li::marker { color: #000; }
-/* pavé basculé : pas de filet vertical sur les items */
-.mission-pave:has(details[open]) li { border-left: 0; padding-left: 0; }
 
-/* repli sans :has() : la liste reste lisible (noir sur jaune non garanti,
-   mais le contenu s'affiche quand même) */
-.mission-pave details[open] ul { color: inherit; }
-
-/* --- paliers : 4 → 3 → 2 → 1 colonnes ----------------------------------
-   Seuils choisis pour que la carte ne descende jamais sous ~190px de
-   contenu utile (au-delà, les titres se cassent mot à mot). */
+/* --- paliers : 4 → 3 → 2 → 1 colonnes ---------------------------------- */
 @media (max-width: 1180px) {
   .missions-jaune { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .mission-pave h3 { font-size: 1rem; }
+  .mission-pave .card-title { font-size: 1rem; }
 }
 @media (max-width: 780px) {
   .missions-jaune { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.6rem; }
-  .mission-pave { min-height: 13rem; }
-  .mission-pave h3,
-  .mission-pave li { font-size: 0.94rem; }
+  .mission-pave { min-height: 18rem; }
+  .mission-pave .card-title,
+  .mission-face-arriere li { font-size: 0.94rem; }
 }
 @media (max-width: 560px) {
   .missions-jaune { grid-template-columns: minmax(0, 1fr); gap: 1.3rem; }
-  .mission-pave { min-height: 0; padding: 1.1rem 1.1rem 1rem; }
+  /* une carte par rangée : la rangée n'impose plus de hauteur, et les faces
+     sont en position absolue — il faut donc la fixer explicitement.
+     La face arrière défile, la carte garde la même hauteur en tournant. */
+  .mission-pave { min-height: 26rem; }
+  .mission-face { padding: 1.1rem 1.1rem 1rem; }
 }
 @media (max-width: 380px) {
-  .mission-pave { padding: 0.9rem 0.9rem 0.85rem; }
-  .mission-pave h3,
-  .mission-pave li { font-size: 0.9rem; }
+  .mission-face { padding: 0.9rem 0.9rem 0.85rem; }
+  .mission-pave .card-title,
+  .mission-face-arriere li { font-size: 0.9rem; }
 }
 /* === end missions === */
