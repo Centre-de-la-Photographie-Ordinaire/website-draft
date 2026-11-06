@@ -14,7 +14,7 @@ title: Les missions
       <div class="mission-face mission-face-avant" id="mission-avant-1">
         <div class="card-body">
           <h3 class="card-title">1 · Collecter et sauvegarder les photographies ordinaires, dévoiler la dimension patrimoniale de la collection</h3>
-          <a href="#" class="btn btn-primary" role="button" data-mission-toggle aria-expanded="false" aria-controls="mission-detail-1">détail<span class="sr-only"> des actions de la mission 1</span>&nbsp;<span class="btn-chevron" aria-hidden="true">›</span></a>
+          <a href="#" class="btn btn-primary btn-favicon" role="button" data-mission-toggle aria-expanded="false" aria-controls="mission-detail-1" aria-label="voir le détail des actions de la mission 1" title="voir le détail des actions"><span class="sr-only">voir le détail des actions de la mission 1</span></a>
         </div>
       </div>
       <div class="mission-face mission-face-arriere" id="mission-detail-1">
@@ -40,7 +40,7 @@ title: Les missions
       <div class="mission-face mission-face-avant" id="mission-avant-2">
         <div class="card-body">
           <h3 class="card-title">2 · Accueillir des artistes contemporains, faire dialoguer création actuelle et photographie ordinaire d'hier et d'aujourd'hui</h3>
-          <a href="#" class="btn btn-primary" role="button" data-mission-toggle aria-expanded="false" aria-controls="mission-detail-2">détail<span class="sr-only"> des actions de la mission 2</span>&nbsp;<span class="btn-chevron" aria-hidden="true">›</span></a>
+          <a href="#" class="btn btn-primary btn-favicon" role="button" data-mission-toggle aria-expanded="false" aria-controls="mission-detail-2" aria-label="voir le détail des actions de la mission 2" title="voir le détail des actions"><span class="sr-only">voir le détail des actions de la mission 2</span></a>
         </div>
       </div>
       <div class="mission-face mission-face-arriere" id="mission-detail-2">
@@ -66,7 +66,7 @@ title: Les missions
       <div class="mission-face mission-face-avant" id="mission-avant-3">
         <div class="card-body">
           <h3 class="card-title">3 · Exercer le regard, penser et dire ce que l'on voit</h3>
-          <a href="#" class="btn btn-primary" role="button" data-mission-toggle aria-expanded="false" aria-controls="mission-detail-3">détail<span class="sr-only"> des actions de la mission 3</span>&nbsp;<span class="btn-chevron" aria-hidden="true">›</span></a>
+          <a href="#" class="btn btn-primary btn-favicon" role="button" data-mission-toggle aria-expanded="false" aria-controls="mission-detail-3" aria-label="voir le détail des actions de la mission 3" title="voir le détail des actions"><span class="sr-only">voir le détail des actions de la mission 3</span></a>
         </div>
       </div>
       <div class="mission-face mission-face-arriere" id="mission-detail-3">
@@ -91,7 +91,7 @@ title: Les missions
       <div class="mission-face mission-face-avant" id="mission-avant-4">
         <div class="card-body">
           <h3 class="card-title">4 · Partager des savoir-faire et accompagner la mise en forme d'archives</h3>
-          <a href="#" class="btn btn-primary" role="button" data-mission-toggle aria-expanded="false" aria-controls="mission-detail-4">détail<span class="sr-only"> des actions de la mission 4</span>&nbsp;<span class="btn-chevron" aria-hidden="true">›</span></a>
+          <a href="#" class="btn btn-primary btn-favicon" role="button" data-mission-toggle aria-expanded="false" aria-controls="mission-detail-4" aria-label="voir le détail des actions de la mission 4" title="voir le détail des actions"><span class="sr-only">voir le détail des actions de la mission 4</span></a>
         </div>
       </div>
       <div class="mission-face mission-face-arriere" id="mission-detail-4">

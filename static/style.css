@@ -1007,13 +1007,53 @@ body {
   transition: background-color 0.15s, color 0.15s, border-color 0.15s;
 }
 .mission-pave .btn-primary {
-  align-self: flex-start;   /* calé à gauche sous le titre */
+  /* bouton calé à DROITE, aligné sur le bord droit intérieur de la carte
+     (retour client 2026-11-06 : plus de bouton texte « détail › » à gauche) */
+  align-self: flex-end;
   flex: 0 0 auto;
   margin-top: auto;
   padding: 0.55em 0.85em;
   background: var(--accent);
   border-color: var(--accent);
   color: #000;
+  margin-right: 0;
+}
+
+/* --- bouton-favicon de la face avant -------------------------------------
+   Le déclencheur de la face avant n'est plus un libellé texte mais l'icône
+   du site. Le favicon porte un liseré anthracite qui le rendrait invisible
+   sur le pavé noir : on l'agrandit à 155 % dans un cadre rogné, si bien que
+   le liseré tombe hors du cadre et qu'il ne reste que le carré jaune et le
+   disque anthracite (technique déjà utilisée avant cpo-me4, cf. a54fe4a). */
+.mission-pave .btn-favicon {
+  width: clamp(1.9rem, 2.4vw, 2.2rem);
+  height: clamp(1.9rem, 2.4vw, 2.2rem);
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  background-image: url("favicon.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 155%;
+  overflow: hidden;
+  /* le texte reste pour les lecteurs d'écran (.sr-only), il n'est jamais peint */
+  font-size: 0;
+  line-height: 0;
+  color: transparent;
+  opacity: 0.92;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.mission-pave .btn-favicon:hover,
+.mission-pave .btn-favicon:focus-visible {
+  opacity: 1;
+  transform: scale(1.08);
+  background-color: transparent;
+  outline: none;
+}
+.mission-pave .btn-favicon:focus-visible {
+  /* anneau de focus visible malgré l'icône-image */
+  box-shadow: 0 0 0 2px var(--accent);
+  opacity: 1;
 }
 .mission-pave .btn-primary:hover,
 .mission-pave .btn-primary:focus-visible {
