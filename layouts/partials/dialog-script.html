@@ -22,6 +22,52 @@
     return Array.prototype.slice.call(document.querySelectorAll('dialog.objet-dialog'));
   }
 
+  /* --- médias : chargés seulement à l'ouverture du panneau ---------------
+     La vidéo d'interview pèse ~9 Mo. Un visiteur qui n'ouvre pas le panneau
+     ne doit rien télécharger : la source reste dans data-src jusqu'au
+     premier showModal(). */
+  function preparerMedia(dialog) {
+    var medias = dialog.querySelectorAll('[data-src]');
+    Array.prototype.forEach.call(medias, function (m) {
+      if (!m.getAttribute('src')) {
+        m.setAttribute('src', m.dataset.src);
+        if (m.tagName === 'VIDEO') m.load();
+      }
+    });
+  }
+
+  function arreterMedia(dialog) {
+    var medias = dialog.querySelectorAll('video, audio');
+    Array.prototype.forEach.call(medias, function (m) {
+      if (!m.paused) m.pause();
+    });
+  }
+
+  /* --- bouton « agrandir » du panneau vidéo ------------------------------
+     Le panneau garde sa largeur de 300 px par défaut ; le bouton lui ajoute
+     .est-agrandi (largeur confortable, toujours ancré en haut à droite).
+     État indépendant des autres panneaux, purement visuel. */
+  function brancherAgrandir(dialog) {
+    var bouton = dialog.querySelector('[data-dialog-agrandir]');
+    if (!bouton) return;
+    bouton.addEventListener('click', function () {
+      var grand = dialog.classList.toggle('est-agrandi');
+      bouton.setAttribute('aria-pressed', String(grand));
+      var libelle = grand ? 'Réduire la vidéo' : 'Agrandir la vidéo';
+      bouton.setAttribute('aria-label', libelle);
+      bouton.setAttribute('title', libelle);
+    });
+    /* en fermant, on revient à la taille normale pour le prochain visiteur */
+    dialog.addEventListener('close', function () {
+      if (dialog.classList.contains('est-agrandi')) {
+        dialog.classList.remove('est-agrandi');
+        bouton.setAttribute('aria-pressed', 'false');
+        bouton.setAttribute('aria-label', 'Agrandir la vidéo');
+        bouton.setAttribute('title', 'Agrandir la vidéo');
+      }
+    });
+  }
+
   var declencheurs = Array.prototype.slice.call(document.querySelectorAll('[data-dialog]'));
 
   declencheurs.forEach(function (lien) {
@@ -42,10 +88,14 @@
       if (dialog.open) { dialog.close(); return; }
       dialogsEls().forEach(function (d) { if (d !== dialog && d.open) d.close(); });
       dialog.showModal();
+      preparerMedia(dialog);
       sync();
     });
 
-    dialog.addEventListener('close', sync);
+    dialog.addEventListener('close', function () {
+      sync();
+      arreterMedia(dialog);
+    });
 
     dialog.addEventListener('click', function (e) {
       if (e.target.closest('[data-dialog-close]')) { dialog.close(); return; }
@@ -58,7 +108,7 @@
     });
   });
 
-  /* fermeture / ouverture par l'API Invoker Commands si le navigateur la
-     gère (areas supports), sans JS supplémentaire */
+  /* les panneaux eux-mêmes (bouton d'agrandissement) */
+  dialogsEls().forEach(brancherAgrandir);
 })();
 </script>

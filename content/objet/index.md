@@ -31,15 +31,26 @@ sansTitre: true
      fond jaune de la charte, texte noir, positionnés en haut à droite du
      viewport. Le JS en bas de page les ouvre en modal (showModal()) : Échap,
      clic sur le fond et retour du focus au déclencheur sont natifs. -->
-<dialog class="objet-dialog" id="panneau-interview" aria-labelledby="panneau-interview-titre">
+<dialog class="objet-dialog objet-dialog-video" id="panneau-interview" aria-labelledby="panneau-interview-titre">
 <div class="objet-dialog-entete">
 <h2 class="objet-dialog-titre" id="panneau-interview-titre">vidéo d'interview</h2>
+<div class="objet-dialog-actions">
+<button type="button" class="objet-dialog-agrandir" data-dialog-agrandir aria-pressed="false" aria-label="Agrandir la vidéo" title="Agrandir la vidéo"><span class="objet-dialog-agrandir-ico" aria-hidden="true">&#9974;</span></button>
 <button type="button" class="objet-dialog-fermer" data-dialog-close aria-label="Fermer">&times;</button>
+</div>
 </div>
 <div class="objet-dialog-corps">
 <figure class="video-ph">
-<div class="video-cadre" role="img" aria-label="emplacement de la vidéo d'interview">▶</div>
-<figcaption>vidéo d'interview : fichier à recevoir, puis intégré ici (lecture locale, pas de plateforme tierce si possible)</figcaption>
+<div class="video-cadre">
+<video class="video-interview" id="video-interview" controls preload="none" playsinline
+ data-src="{{< rel "videos/interview-extrait.mp4" >}}"
+ poster="{{< rel "images/interview-poster.jpg" >}}"
+ width="1280" height="720" aria-label="Interview de Jacques et Élise, extrait de 44 secondes">
+Votre navigateur ne sait pas lire les vidéos au format MP4.
+<a href="{{< rel "videos/interview-extrait.mp4" >}}">Télécharger l'extrait (.mp4, 9 Mo)</a>
+</video>
+</div>
+<figcaption>extrait de l'interview — 44 secondes. La vidéo complète (14 min) sera intégrée une fois validée.</figcaption>
 </figure>
 </div>
 </dialog>
