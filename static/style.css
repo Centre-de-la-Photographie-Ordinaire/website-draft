@@ -1043,26 +1043,17 @@ body {
   opacity: 0.92;
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
-.mission-pave .btn-favicon:hover,
-.mission-pave .btn-favicon:focus-visible {
-  opacity: 1;
-  transform: scale(1.08);
-  background-color: transparent;
-  outline: none;
-}
-.mission-pave .btn-favicon:focus-visible {
-  /* anneau de focus visible malgré l'icône-image */
-  box-shadow: 0 0 0 2px var(--accent);
-  opacity: 1;
-}
-.mission-pave .btn-primary:hover,
-.mission-pave .btn-primary:focus-visible {
+/* bouton TEXTE de la charte (aujourd'hui : les liens de la face arrière) :
+   il bascule en blanc chamois au survol. Les boutons-favicon en sont exclus
+   (:not(.btn-favicon)) : l'icône ne doit jamais changer de couleur. */
+.mission-pave .btn-primary:not(.btn-favicon):hover,
+.mission-pave .btn-primary:not(.btn-favicon):focus-visible {
   background: var(--ink);
   border-color: var(--ink);
   color: #000;
   outline: none;
 }
-.mission-pave .btn-primary:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+.mission-pave .btn-primary:not(.btn-favicon):focus-visible { box-shadow: 0 0 0 2px var(--accent); }
 .mission-pave .btn-chevron {
   font-size: 1.05rem;
   font-weight: 700;
@@ -1071,6 +1062,23 @@ body {
   transition: transform 0.2s ease;
 }
 .mission-pave .btn-primary:hover .btn-chevron { transform: translateX(0.15em); }
+
+/* --- bouton-favicon : survol et focus --------------------------------
+   Placé APRÈS les règles .btn-primary pour gagner la cascade. Seuls
+   l'opacité et l'échelle bougent : ni la couleur de fond, ni l'image. */
+.mission-pave .btn-favicon:hover,
+.mission-pave .btn-favicon:focus-visible {
+  background-color: transparent;
+  background-image: url("favicon.png");
+  border-color: transparent;
+  color: transparent;
+  opacity: 1;
+  transform: scale(1.08);
+  outline: none;
+}
+.mission-pave .btn-favicon:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent);   /* anneau de focus visible */
+}
 
 /* --- contenu de la face arrière ----------------------------------------- */
 .mission-retour-titre {
@@ -1090,12 +1098,42 @@ body {
 }
 .mission-face-arriere .btn-primary:hover,
 .mission-face-arriere .btn-primary:focus-visible {
-  background: transparent;
-  border-color: #000;
-  color: #000;
   box-shadow: none;
 }
 .mission-face-arriere .btn-primary:focus-visible { box-shadow: 0 0 0 2px #000; }
+
+/* --- bouton-favicon de la face ARRIÈRE (retour vers la face avant) --------
+   Même icône que la face avant, alignée à droite : le geste est le même dans
+   les deux sens, seul le sens du chevron changeait avant. */
+.mission-face-arriere .btn-favicon {
+  width: clamp(1.9rem, 2.4vw, 2.2rem);
+  height: clamp(1.9rem, 2.4vw, 2.2rem);
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  background-image: url("favicon.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 155%;
+  overflow: hidden;
+  font-size: 0;
+  line-height: 0;
+  color: transparent;
+  opacity: 0.92;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.mission-face-arriere .btn-favicon:hover,
+.mission-face-arriere .btn-favicon:focus-visible {
+  /* pas de changement de couleur de l'icône ici non plus */
+  background-color: transparent;
+  background-image: url("favicon.png");
+  border-color: transparent;
+  color: transparent;
+  opacity: 1;
+  transform: scale(1.08);
+  outline: none;
+}
+.mission-face-arriere .btn-favicon:focus-visible { box-shadow: 0 0 0 2px #000; }
 .mission-face-arriere .btn-chevron { transform: rotate(180deg); }
 
 /* liens optionnels de la face arrière (ils ouvrent le <dialog> haut-droite) */
@@ -1127,8 +1165,6 @@ body {
   line-height: 1.5;
   font-size: clamp(0.85rem, 0.95vw, 0.92rem);
   color: inherit;
-  padding-left: 0.7rem;
-  border-left: 2px solid rgba(0, 0, 0, 0.3);
 }
 
 /* --- paliers : 4 → 3 → 2 → 1 colonnes ---------------------------------- */

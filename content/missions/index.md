@@ -29,7 +29,7 @@ title: Les missions
             </ul>
           <p class="mission-liens"><a href="#" class="mission-lien" data-dialog="mission-dialog-1" aria-expanded="false">donner ses photographies<span class="sr-only"> (s'ouvre dans un panneau)</span> →</a></p>
           </div>
-          <a href="#" class="btn btn-primary" role="button" data-mission-retour aria-controls="mission-avant-1">retour<span class="sr-only"> à la mission 1</span>&nbsp;<span class="btn-chevron" aria-hidden="true">›</span></a>
+          <a href="#" class="btn btn-primary btn-favicon" role="button" data-mission-retour aria-controls="mission-avant-1" aria-label="revenir au titre de la mission 1" title="revenir à la face avant"><span class="sr-only">revenir au titre de la mission 1</span></a>
         </div>
       </div>
     </div>
@@ -55,7 +55,7 @@ title: Les missions
             </ul>
           <p class="mission-liens"><a href="#" class="mission-lien" data-dialog="mission-dialog-2" aria-expanded="false">en savoir plus sur les résidences<span class="sr-only"> (s'ouvre dans un panneau)</span> →</a></p>
           </div>
-          <a href="#" class="btn btn-primary" role="button" data-mission-retour aria-controls="mission-avant-2">retour<span class="sr-only"> à la mission 2</span>&nbsp;<span class="btn-chevron" aria-hidden="true">›</span></a>
+          <a href="#" class="btn btn-primary btn-favicon" role="button" data-mission-retour aria-controls="mission-avant-2" aria-label="revenir au titre de la mission 2" title="revenir à la face avant"><span class="sr-only">revenir au titre de la mission 2</span></a>
         </div>
       </div>
     </div>
@@ -80,7 +80,7 @@ title: Les missions
             <li>Formation d'intervenants relais à la conduite d'ateliers d'éducation à l'image</li>
             </ul>
           </div>
-          <a href="#" class="btn btn-primary" role="button" data-mission-retour aria-controls="mission-avant-3">retour<span class="sr-only"> à la mission 3</span>&nbsp;<span class="btn-chevron" aria-hidden="true">›</span></a>
+          <a href="#" class="btn btn-primary btn-favicon" role="button" data-mission-retour aria-controls="mission-avant-3" aria-label="revenir au titre de la mission 3" title="revenir à la face avant"><span class="sr-only">revenir au titre de la mission 3</span></a>
         </div>
       </div>
     </div>
@@ -105,7 +105,7 @@ title: Les missions
             <li>Accompagnement des institutions dans la création d'archives à partir de traces dispersées</li>
             </ul>
           </div>
-          <a href="#" class="btn btn-primary" role="button" data-mission-retour aria-controls="mission-avant-4">retour<span class="sr-only"> à la mission 4</span>&nbsp;<span class="btn-chevron" aria-hidden="true">›</span></a>
+          <a href="#" class="btn btn-primary btn-favicon" role="button" data-mission-retour aria-controls="mission-avant-4" aria-label="revenir au titre de la mission 4" title="revenir à la face avant"><span class="sr-only">revenir au titre de la mission 4</span></a>
         </div>
       </div>
     </div>
