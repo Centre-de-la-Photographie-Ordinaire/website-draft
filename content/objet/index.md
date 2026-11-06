@@ -19,9 +19,9 @@ sansTitre: true
 </figure>
 
 <ul class="objet-liens">
-<li><button type="button" class="objet-lien" data-panneau="panneau-interview" aria-expanded="false" aria-controls="panneau-interview"><span class="objet-lien-puce" aria-hidden="true"></span><span class="objet-lien-texte">interview</span></button></li>
-<li><button type="button" class="objet-lien" data-panneau="panneau-collection" aria-expanded="false" aria-controls="panneau-collection"><span class="objet-lien-puce" aria-hidden="true"></span><span class="objet-lien-texte">la collection</span></button></li>
-<li><button type="button" class="objet-lien" data-panneau="panneau-ordinaire" aria-expanded="false" aria-controls="panneau-ordinaire"><span class="objet-lien-puce" aria-hidden="true"></span><span class="objet-lien-texte">l'ordinaire</span></button></li>
+<li><button type="button" class="objet-lien" data-dialog="panneau-interview" aria-expanded="false" aria-controls="panneau-interview"><span class="objet-lien-puce" aria-hidden="true"></span><span class="objet-lien-texte">interview</span></button></li>
+<li><button type="button" class="objet-lien" data-dialog="panneau-collection" aria-expanded="false" aria-controls="panneau-collection"><span class="objet-lien-puce" aria-hidden="true"></span><span class="objet-lien-texte">la collection</span></button></li>
+<li><button type="button" class="objet-lien" data-dialog="panneau-ordinaire" aria-expanded="false" aria-controls="panneau-ordinaire"><span class="objet-lien-puce" aria-hidden="true"></span><span class="objet-lien-texte">l'ordinaire</span></button></li>
 
 </ul>
 </div>
@@ -71,44 +71,4 @@ sansTitre: true
 </dialog>
 
 
-<script>
-/* objet — trois liens légers ouvrant un <dialog> natif en haut à droite.
-   Modèle « components/dialog » : showModal()/close(), ::backdrop, Échap natif.
-   Pas de Bootstrap JS sur le site : on reproduit ici l'essentiel du plugin.
-   Re-clic sur le lien ouvert = fermeture ; le focus revient au déclencheur. */
-(function () {
-var liens = Array.prototype.slice.call(document.querySelectorAll('.objet-lien'));
-
-liens.forEach(function (lien) {
-var dialog = document.getElementById(lien.dataset.panneau);
-if (!dialog) return;
-
-var sync = function () {
-var ouvert = dialog.open;
-lien.classList.toggle('active', ouvert);
-lien.setAttribute('aria-expanded', String(ouvert));
-};
-
-/* un modal rend le reste de la page inerte : on ne peut pas cliquer un autre
-   lien tant que celui-ci est ouvert, donc pas de bascule directe entre
-   panneaux — re-clic impossible aussi, on ferme depuis le dialog. */
-lien.addEventListener('click', function () {
-if (dialog.open) { dialog.close(); return; }
-dialog.showModal();
-sync();
-});
-
-dialog.addEventListener('close', sync);
-
-/* bouton de fermeture */
-dialog.addEventListener('click', function (e) {
-if (e.target.closest('[data-dialog-close]')) { dialog.close(); return; }
-/* clic sur le fond (::backdrop) : la cible est le <dialog> lui-même */
-if (e.target === dialog) {
-var r = dialog.getBoundingClientRect();
-if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dialog.close();
-}
-});
-});
-})();
-</script>
+{{< dialog-script >}}

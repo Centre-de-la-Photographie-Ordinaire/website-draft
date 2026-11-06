@@ -27,6 +27,7 @@ title: Les missions
             <li>Expositions de la collection au sein du centre et hors les murs</li>
             <li>Édition et diffusion d'ouvrages</li>
             </ul>
+          <p class="mission-liens"><a href="#" class="mission-lien" data-dialog="mission-dialog-1" aria-expanded="false">donner ses photographies<span class="sr-only"> (s'ouvre dans un panneau)</span> →</a></p>
           </div>
           <a href="#" class="btn btn-primary" role="button" data-mission-retour aria-controls="mission-avant-1">retour<span class="sr-only"> à la mission 1</span>&nbsp;<span class="btn-chevron" aria-hidden="true">›</span></a>
         </div>
@@ -52,6 +53,7 @@ title: Les missions
             <li>Ouverture du fonds aux chercheurs en anthropologie visuelle, histoire de la photographie, esthétique, sociologie…</li>
             <li>Implication des adhérents et habitants du territoire pour proposer des thèmes de résidence et de recherche</li>
             </ul>
+          <p class="mission-liens"><a href="#" class="mission-lien" data-dialog="mission-dialog-2" aria-expanded="false">en savoir plus sur les résidences<span class="sr-only"> (s'ouvre dans un panneau)</span> →</a></p>
           </div>
           <a href="#" class="btn btn-primary" role="button" data-mission-retour aria-controls="mission-avant-2">retour<span class="sr-only"> à la mission 2</span>&nbsp;<span class="btn-chevron" aria-hidden="true">›</span></a>
         </div>
@@ -172,3 +174,29 @@ syncCarte(carte);
 });
 })();
 </script>
+
+<!-- Panneaux ouverts depuis la face arrière des cartes : mêmes <dialog>
+     « haut-droite, fond jaune, texte noir » que la page objet. -->
+<dialog class="objet-dialog" id="mission-dialog-1" aria-labelledby="mission-dialog-1-titre">
+<div class="objet-dialog-entete">
+<h2 class="objet-dialog-titre" id="mission-dialog-1-titre">donner ses photographies</h2>
+<button type="button" class="objet-dialog-fermer" data-dialog-close aria-label="Fermer">&times;</button>
+</div>
+<div class="objet-dialog-corps">
+<p>Les familles peuvent confier leurs photographies au centre pour qu'elles rejoignent le <em>commun des mortels</em> : la collecte est permanente et sans hiérarchie esthétique.</p>
+<p><a href="{{< rel "collecte/" >}}">page collecte →</a> — modalités, rendez-vous et permanences.</p>
+</div>
+</dialog>
+
+<dialog class="objet-dialog" id="mission-dialog-2" aria-labelledby="mission-dialog-2-titre">
+<div class="objet-dialog-entete">
+<h2 class="objet-dialog-titre" id="mission-dialog-2-titre">les résidences</h2>
+<button type="button" class="objet-dialog-fermer" data-dialog-close aria-label="Fermer">&times;</button>
+</div>
+<div class="objet-dialog-corps">
+<p>Le centre accueille en résidence des artistes et des commissaires d'exposition, et ouvre le fonds aux chercheurs en anthropologie visuelle, histoire de la photographie, esthétique et sociologie.</p>
+<p><a href="{{< rel "residences/" >}}">page résidences →</a> — appel à projets et accueil en cours.</p>
+</div>
+</dialog>
+
+{{< dialog-script >}}

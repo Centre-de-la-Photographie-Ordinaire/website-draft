@@ -1,0 +1,64 @@
+{{/*
+  Script commun des <dialog> « haut-droite, fond jaune, texte noir ».
+  Utilisé par /objet/ (trois liens) et par les faces arrière des cartes de
+  /missions/ (liens optionnels).
+
+  Contrat HTML — le déclencheur porte :
+    data-dialog="id-du-dialog"      (obligatoire : cible)
+    aria-expanded="false"           (mis à jour par le script)
+  Le <dialog> cible porte la classe .objet-dialog et peut contenir
+  n'importe quel bouton [data-dialog-close].
+
+  Modèle « components/dialog » : showModal()/close(), ::backdrop, Échap et
+  retour du focus au déclencheur sont natifs. Le site ne charge pas le JS
+  Bootstrap : on reproduit ici l'essentiel du plugin.
+*/}}
+<script>
+(function () {
+  if (window.__cpoDialogs) return;   /* idempotent : un seul branchement */
+  window.__cpoDialogs = true;
+
+  function dialogsEls() {
+    return Array.prototype.slice.call(document.querySelectorAll('dialog.objet-dialog'));
+  }
+
+  var declencheurs = Array.prototype.slice.call(document.querySelectorAll('[data-dialog]'));
+
+  declencheurs.forEach(function (lien) {
+    var dialog = document.getElementById(lien.dataset.dialog);
+    if (!dialog) return;
+
+    var sync = function () {
+      var ouvert = dialog.open;
+      lien.classList.toggle('active', ouvert);
+      lien.setAttribute('aria-expanded', String(ouvert));
+    };
+
+    /* un modal rend le reste de la page inerte : on ne peut pas cliquer un
+       autre déclencheur tant que celui-ci est ouvert. */
+    lien.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();      /* ne pas déclencher le flip de carte au passage */
+      if (dialog.open) { dialog.close(); return; }
+      dialogsEls().forEach(function (d) { if (d !== dialog && d.open) d.close(); });
+      dialog.showModal();
+      sync();
+    });
+
+    dialog.addEventListener('close', sync);
+
+    dialog.addEventListener('click', function (e) {
+      if (e.target.closest('[data-dialog-close]')) { dialog.close(); return; }
+      /* clic sur le fond (::backdrop) : la cible est le <dialog> lui-même */
+      if (e.target === dialog) {
+        var r = dialog.getBoundingClientRect();
+        if (e.clientX < r.left || e.clientX > r.right ||
+            e.clientY < r.top || e.clientY > r.bottom) dialog.close();
+      }
+    });
+  });
+
+  /* fermeture / ouverture par l'API Invoker Commands si le navigateur la
+     gère (areas supports), sans JS supplémentaire */
+})();
+</script>

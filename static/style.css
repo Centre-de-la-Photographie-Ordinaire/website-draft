@@ -528,6 +528,12 @@ body {
 .objet-dialog-corps figcaption { font-size: 0.82rem; color: rgba(0, 0, 0, 0.7); }
 .objet-dialog-corps .video-cadre { border: 1px dashed rgba(0, 0, 0, 0.45); }
 
+/* les panneaux ouverts depuis une carte de mission peuvent être plus larges
+   sur grand écran (listes d'actions, texte en deux paragraphes) */
+@media (min-width: 900px) {
+  .objet-dialog { width: min(34rem, calc(100vw - 1.8rem)); }
+}
+
 .objet-col-image { margin: 0; }
 .objet-image-principale { margin: 0; }
 .objet-image-principale img { width: 100%; height: auto; display: block; }
@@ -878,9 +884,17 @@ body {
 }
 .mission-face-avant {
   transform: rotateY(0deg);
+  z-index: 0;
 }
+/* la face inactive ne capture pas les clics : [inert] vaut pointer-events:none
+   dans la spec, mais on le rend explicite pour les navigateurs partiels.
+   Cela garde aussi la face arrière cliquable juste après le flip, quand le
+   focus y a déjà été porté mais que l'animation tourne encore. */
+.mission-face[inert],
+.mission-face[inert] * { pointer-events: none; }
 .mission-face-arriere {
   transform: rotateY(180deg);
+  z-index: 0;
   /* fond jaune, texte noir : la face arrière reprend le contraste
      noir sur jaune demandé pour les panneaux de la page objet */
   background: var(--accent);
@@ -984,6 +998,24 @@ body {
 }
 .mission-face-arriere .btn-primary:focus-visible { box-shadow: 0 0 0 2px #000; }
 .mission-face-arriere .btn-chevron { transform: rotate(180deg); }
+
+/* liens optionnels de la face arrière (ils ouvrent le <dialog> haut-droite) */
+.mission-liens { margin: 0; }
+.mission-lien {
+  display: inline-block;
+  font-size: 0.82rem;
+  color: #000;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  transition: background-color 0.15s, color 0.15s;
+}
+.mission-lien:hover,
+.mission-lien:focus-visible {
+  background: #000;
+  color: var(--accent);
+  outline: none;
+}
+.mission-lien:focus-visible { box-shadow: 0 0 0 2px #000; }
 
 .mission-face-arriere ul {
   margin: 0;
