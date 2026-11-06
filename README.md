@@ -27,6 +27,35 @@ hugo server         # mode dev, auto-reload
 L'URL finale sera `/experiments/<nom>/`. Ne pas créer de page Hugo du même
 nom : les fichiers statiques prennent la main.
 
+## panneaux « dialog » (haut-droite, jaune)
+
+Les trois liens de `/objet/` et les liens optionnels au dos des cartes de
+`/missions/` ouvrent un `<dialog>` natif en haut à droite du viewport, texte
+noir sur fond jaune (modèle `components/dialog`). Le site ne charge pas le JS
+Bootstrap : `layouts/partials/dialog-script.html` en reproduit l'essentiel
+(`showModal()` / `close()`, `::backdrop`, Échap, retour du focus).
+
+Depuis une page en Markdown, inclure le script avec `{{< dialog-script >}}`,
+puis sur le déclencheur :
+
+```html
+<a href="#" data-dialog="mon-panneau" aria-expanded="false">ouvrir</a>
+
+<dialog class="objet-dialog" id="mon-panneau" aria-labelledby="mon-panneau-titre">
+  <div class="objet-dialog-entete">
+    <h2 class="objet-dialog-titre" id="mon-panneau-titre">titre</h2>
+    <button type="button" class="objet-dialog-fermer" data-dialog-close aria-label="Fermer">&times;</button>
+  </div>
+  <div class="objet-dialog-corps"><p>contenu</p></div>
+</dialog>
+```
+
+Le shortcode `{{< rel "chemin/" >}}` reste à utiliser pour les liens internes
+(sous-chemin `/website-draft/`).
+
+> dans les pages en Markdown, utilisez `<!-- -->` et non `{{/* */}}` pour les
+> commentaires : selon la version de Hugo, ce dernier s'affiche en clair.
+
 ## remotes / deploys
 
 - `origin` — https://github.com/Centre-de-la-Photographie-Ordinaire/website-draft
