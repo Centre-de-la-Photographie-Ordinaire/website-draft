@@ -2,7 +2,7 @@
 # (cf. HUGO_BASE_URL dans .github/workflows/deploy.yml)
 baseURL = "https://centre-de-la-photographie-ordinaire.github.io/website-draft/"
 languageCode = "fr-fr"
-title = "centre de la photographie ordinaire · brouillons"
+title = "Centre de la photographie ordinaire · brouillons"
 timeZone = "Europe/Paris"
 enableRobustParser = true
 
