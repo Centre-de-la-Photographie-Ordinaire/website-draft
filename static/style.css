@@ -889,7 +889,20 @@ body {
   }
 }
 
-/* ===== page 4 — collection : accordéon mono-ouvert ===== */
+/* ===== page 4 — collection : accordéon mono-ouvert =====
+   Une ligne par collection ; en ouvrir une referme la précédente (cf. baseof.html).
+   Chaque panneau ouvert contient la galerie de la collection : grande image
+   au-dessus, bandeau de vignettes en dessous (modèle romapublications). Les
+   images portent elles-mêmes leur marge grise unie #AEAEAE (cf.
+   tools/import-collection.py) : vignettes et grandes images ont toutes le même
+   format, la photo centrée dans le fond. */
+.collection-page { max-width: 62rem; }
+.collection-chapeau {
+  max-width: 38rem;
+  margin-bottom: 2rem;
+  color: var(--dim);
+}
+
 .collection-list {
   display: flex;
   flex-direction: column;
@@ -900,6 +913,10 @@ body {
   border-bottom: 1px solid rgba(245, 239, 228, 0.1);
 }
 .collection-item summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
   font-family: var(--font-titre);
   font-size: 1.02rem;
   font-weight: 400;
@@ -912,24 +929,176 @@ body {
 .collection-item summary::-webkit-details-marker { display: none; }
 .collection-item summary:hover { background: rgba(250, 182, 23, 0.05); }
 .collection-item[open] summary { color: var(--accent); }
-.collection-images {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+/* nombre d'images, en retrait, comme une pagination discrète */
+.collection-nb {
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+.collection-item[open] .collection-nb { color: rgba(250, 182, 23, 0.7); }
+
+/* --- galerie d'une collection (dans son panneau) --- */
+.galerie { padding: 0.2rem 0.5rem 1.4rem; }
+.galerie[hidden] { display: none; }
+
+.galerie-vue {
+  position: relative;
+  margin: 0 0 0.8rem;
+  display: flex;
+  justify-content: center;
+}
+/* le cadre se règle sur l'image (largeur « shrink-to-fit ») : flèches et
+   légende se posent sur ses bords */
+.galerie-cadre {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  line-height: 0;
+}
+/* la grande image ne dépasse pas une part raisonnable de la fenêtre : le
+   bandeau de vignettes doit rester visible sous elle, c'est lui qui commande
+   (modèle romapublications). On borne donc la hauteur, et la largeur suit. */
+.galerie-image-lien { display: block; max-width: 100%; line-height: 0; }
+.galerie-image {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(58vh, 34rem);
+  /* la marge grise est déjà dans l'image : on ajoute seulement l'ombre
+     portée du modèle */
+  box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.85);
+  border-radius: 1px;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  transition: opacity 0.18s ease;
+}
+.galerie-image:not([src]) { opacity: 0; }
+
+/* flèches précédent / suivant, posées sur la grande image ; descendues de
+   10 px sous le milieu (retour client 2026-11-12 : « arrow in galerie-fleche
+   is too high ») */
+.galerie-fleche {
+  position: absolute;
+  top: calc(50% + 10px);
+  transform: translateY(-50%);
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(20, 23, 26, 0.5);
+  color: var(--ink);
+  font-family: var(--font-titre);
+  font-size: 2rem;
+  line-height: 1;
+  /* les guillemets ‹ › sont dessinés sur la hauteur des minuscules : c'est
+     .galerie-fleche span qui recale le glyphe dans le rond (pas de padding,
+     qui décentrerait l'encre). */
+  padding: 0;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+/* les guillemets ‹ › sont dessinés haut : sans correction, le centre de leur
+   encre tombe ~2,4 px AU-DESSUS du centre du rond (mesuré dans Chrome,
+   retour client 2026-11-12 : « the > or < symbols are too high »).
+   0,02em recentre l'encre au pixel près. */
+.galerie-fleche span { display: block; transform: translateY(0.02em); }
+.galerie-fleche-gauche { left: 0.8rem; }
+.galerie-fleche-droite { right: 0.8rem; }
+.galerie-vue:hover .galerie-fleche,
+.galerie-fleche:focus-visible { opacity: 1; }
+.galerie-fleche:hover { background: var(--accent); color: var(--ardoise); }
+.galerie-fleche:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.galerie-legende {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
   gap: 0.6rem;
-  padding: 0.6rem 0.5rem 1rem;
+  padding: 0.35rem 0.7rem;
+  background: rgba(20, 23, 26, 0.66);
+  color: var(--ink);
+  font-family: var(--font-titre);
+  font-size: 0.76rem;
+  letter-spacing: 0.14em;
+  text-transform: lowercase;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
 }
-.collection-images img {
-  width: 100%;
-  height: 140px;
-  object-fit: cover;
-  border: 2px solid rgba(250, 182, 23, 0.3);
-  transition: border-color 0.2s;
+.galerie-vue:hover .galerie-legende,
+.galerie-vue:focus-within .galerie-legende { opacity: 1; }
+.galerie-legende-num { color: var(--accent); }
+
+/* --- bandeau de vignettes --- */
+.galerie-pellicule {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.15rem 0.1rem 0.6rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(250, 182, 23, 0.5) transparent;
+  -webkit-overflow-scrolling: touch;
 }
-.collection-images img:hover { border-color: var(--accent); }
+.galerie-pellicule::-webkit-scrollbar { height: 6px; }
+.galerie-pellicule::-webkit-scrollbar-thumb {
+  background: rgba(250, 182, 23, 0.45);
+  border-radius: 3px;
+}
+.galerie-pellicule::-webkit-scrollbar-track { background: transparent; }
 
-/* accordéon JS : collection — fermer l'item ouvert avant d'en ouvrir un autre */
+.galerie-vignette {
+  flex: 0 0 auto;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+  position: relative;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.galerie-vignette img {
+  display: block;
+  height: 5.6rem;
+  width: auto;
+  border: 1px solid rgba(245, 239, 228, 0.14);
+  transition: border-color 0.15s;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.galerie-vignette:hover { opacity: 0.95; }
+.galerie-vignette:hover img { border-color: rgba(250, 182, 23, 0.55); }
+.galerie-vignette.est-active { opacity: 1; }
+.galerie-vignette.est-active img { border-color: var(--accent); }
+.galerie-vignette:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* (ancien layout 50/50 expositions, remplacé par .expo-layout — voir plus haut) */
+/* pas de survol au doigt : les flèches et la légende restent visibles */
+@media (hover: none) {
+  .galerie-fleche, .galerie-legende { opacity: 1; }
+}
+
+@media (max-width: 700px) {
+  .collection-page { padding-left: 1rem; padding-right: 1rem; }
+  .galerie { padding-left: 0; padding-right: 0; }
+  .galerie-fleche { width: 2.6rem; height: 2.6rem; font-size: 1.7rem; }
+  .galerie-fleche-gauche { left: 0.35rem; }
+  .galerie-fleche-droite { right: 0.35rem; }
+  .galerie-vignette img { height: 4.4rem; }
+  .galerie-image { max-height: 60vh; }
+}
 
 /* ===== page 6 — résidences ===== */
 .residences-content { max-width: 40rem; }
