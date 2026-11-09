@@ -19,7 +19,6 @@ title: Missions
       </div>
       <div class="mission-face mission-face-arriere" id="mission-detail-1">
         <div class="card-body">
-          <p class="mission-retour-titre">mission 1</p>
           <div class="card-text">
             <ul>
             <li>Collecte permanente de photos, sans hiérarchie esthétique</li>
@@ -44,7 +43,6 @@ title: Missions
       </div>
       <div class="mission-face mission-face-arriere" id="mission-detail-2">
         <div class="card-body">
-          <p class="mission-retour-titre">mission 2</p>
           <div class="card-text">
             <ul>
             <li>Accueil en résidence d'artistes et de commissaires d'exposition</li>
@@ -69,7 +67,6 @@ title: Missions
       </div>
       <div class="mission-face mission-face-arriere" id="mission-detail-3">
         <div class="card-body">
-          <p class="mission-retour-titre">mission 3</p>
           <div class="card-text">
             <ul>
             <li>Ateliers d'observation, de classement, de description de photographies</li>
@@ -93,7 +90,6 @@ title: Missions
       </div>
       <div class="mission-face mission-face-arriere" id="mission-detail-4">
         <div class="card-body">
-          <p class="mission-retour-titre">mission 4</p>
           <div class="card-text">
             <ul>
             <li>Ateliers d'apprentissage de pratiques photographiques</li>

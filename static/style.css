@@ -1061,15 +1061,25 @@ body {
   /* la perspective est portée par la carte, la rotation par l'intérieur */
   perspective: 1200px;
 }
-
-/* l'intérieur tourne ; ses deux faces sont superposées.
-   Il remplit la hauteur de la rangée de grille (le contenu de la face avant
-   ne suffit pas à la définir). */
-/* L'intérieur tourne et remplit la carte. La FACE AVANT est celle du flux :
-   elle donne sa hauteur à la carte (titre + bouton en bas à droite). La face
-   arrière est superposée en absolu : elle reçoit donc toujours la hauteur de
-   la carte, et son fond jaune la couvre entièrement, que son texte soit long
-   ou court. */
+/* CADRE DES CARTES — pourquoi une bordure seule ne suffisait pas.
+   La bordure de la carte est jaune (--accent) et la face arrière est jaune
+   de la MÊME couleur : dès qu'une carte était retournée, sa bordure
+   disparaissait dans son propre fond. Comme la grille se réorganise (4 → 3
+   → 2 → 1 colonnes), ce n'était jamais les mêmes cartes qui semblaient
+   « sans bordure », d'où l'impression que la visibilité changeait avec la
+   largeur du viewport.
+   Correctif : on garde la bordure jaune, et on ajoute un filet anthracite
+   de 1 px À L'INTÉRIEUR du cadre (sur .mission-interieur). Le cadre jaune
+   reste donc lisible dans les deux états :
+     · face avant : filet anthracite entre le noir du pavé et le jaune ;
+     · face arrière : filet anthracite entre le jaune de la face et le jaune
+       de la bordure — ce qui sépare visuellement les deux aplats de jaune.
+   Le filet est un `outline`, pas un `border` : il ne change pas la boîte et
+   ne décale rien (ni la grille, ni les faces en position absolue). */
+/* --- l'intérieur : il tourne ; ses deux faces sont superposées.
+   Il remplit la hauteur de la carte. La FACE ARRIÈRE est celle du flux :
+   elle donne sa hauteur à la carte (tout son texte tient, rien ne défile).
+   La face avant est superposée en absolu et reçoit donc la même hauteur. */
 .mission-interieur {
   position: relative;
   display: flex;
@@ -1078,12 +1088,13 @@ body {
   height: 100%;
   transform-style: preserve-3d;
   transition: transform 0.55s cubic-bezier(0.4, 0.05, 0.2, 1);
+  outline: 1px solid rgba(20, 23, 26, 0.9);
+  outline-offset: 0;
 }
 .mission-pave.est-retournee .mission-interieur {
   transform: rotateY(180deg);
 }
 /* pendant la rotation, la face cachée ne doit pas transparaître en miroir */
-.mission-interieur { transition: transform 0.55s cubic-bezier(0.4, 0.05, 0.2, 1); }
 .mission-pave .mission-face-arriere { backface-visibility: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .mission-interieur { transition: none; }
@@ -1112,10 +1123,12 @@ body {
   overflow: visible;
 }
 /* FACE AVANT : superposée, donc toujours de la taille exacte de la carte ;
-   elle a son propre fond noir et son bouton dans le coin bas-droit. */
+   elle a son propre fond noir et son bouton dans le coin bas-droit.
+   inset: 1px → le fond noir ne recouvre pas la bordure jaune de la carte,
+   qui forme donc un cadre continu, identique sur les deux faces. */
 .mission-face-avant {
   position: absolute;
-  inset: 0;
+  inset: 1px;
   background: #000;
   transform: rotateY(0deg);
   z-index: 0;
@@ -1134,8 +1147,7 @@ body {
   background: var(--accent);
   color: #000;
 }
-/* la face arrière est toute entière un bouton « retour » : le curseur main
-   doit apparaître sur TOUTE sa surface (titre, liste, marges), pas seulement
+/* la face arrière est toute entière un bouton « retour » : le curseur main   doit apparaître sur TOUTE sa surface (titre, liste, marges), pas seulement
    sur le texte — d'où le sélecteur descendant (cpo-p5d). Les liens qui ont
    une action propre gardent leur propre curseur (voir plus bas). */
 .mission-pave.est-cliquable,
@@ -1166,10 +1178,6 @@ body {
   letter-spacing: 0.01em;
   line-height: 1.4;
   text-align: center;
-  /* le titre se centre verticalement ET horizontalement dans la face ; la
-     marge basse le tient au-dessus du bouton-favicon posé dans le coin.
-     (margin auto : il annule aussi les marges héritées de .main h3) */
-  margin: auto 0 0;
   padding-bottom: 2.6rem;
   color: var(--ink);
 }
@@ -1196,7 +1204,6 @@ body {
   text-align: center;
   cursor: pointer;
   user-select: none;
-  border: 1px solid transparent;
   border-radius: 0;
   transition: background-color 0.15s, color 0.15s, border-color 0.15s;
 }
@@ -1232,15 +1239,12 @@ body {
 .mission-pave .btn-favicon {
   width: 2.25rem;
   height: 2.25rem;
-  padding: 0.15rem;
   box-sizing: border-box;
-  border: 1px solid var(--accent);
   background: var(--accent);
   /* le texte reste pour les lecteurs d'écran (.sr-only), il n'est jamais peint */
   font-size: 0;
   line-height: 0;
   color: transparent;
-  opacity: 0.95;
   transition: opacity 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
 }
 .mission-pave .btn-favicon .btn-favicon-ico {
@@ -1273,15 +1277,8 @@ body {
 .mission-pave .btn-favicon:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
 
 /* --- contenu de la face arrière ----------------------------------------- */
-.mission-retour-titre {
-  font-family: var(--font-titre);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.28em;
-  text-transform: lowercase;
-  margin: 0;
-  color: rgba(0, 0, 0, 0.62);
-}
+/* (le titre « mission N » .mission-retour-titre a été retiré sur demande
+   client : la face arrière commence directement par la liste des actions) */
 
 /* liens optionnels de la face arrière (ils ouvrent le <dialog> haut-droite) */
 .mission-liens { margin: 0; }
