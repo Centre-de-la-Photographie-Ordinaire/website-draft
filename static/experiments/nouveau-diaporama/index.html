@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="stage">
+  <div id="stage" role="button" tabindex="0" aria-label="photo : cliquer pour mettre en pause le diaporama">
     <img id="photo" alt="" width="1920" height="1080"
          decoding="async" fetchpriority="high" />
   </div>
@@ -25,8 +25,7 @@
     <a id="logo-tp" href="../../" aria-label="centre de la photographie ordinaire, entrer sur le site">
       <img src="../../images/logo-cpo-horizontal.png" alt="" width="800" height="496">
     </a>
-    <button class="nav-btn" id="btn-prev" aria-label="photo précédente">‹</button>
-    <button class="nav-btn" id="btn-next" aria-label="photo suivante">›</button>
+    <button type="button" id="state" aria-label="mettre le diaporama en pause" aria-pressed="false"></button>
   </div>
 
   <script type="module" src="main.js"></script>

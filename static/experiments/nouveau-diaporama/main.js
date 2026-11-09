@@ -17,7 +17,7 @@
 'use strict';
 
 // ---------------------------------------------------------------- réglages
-const INTERVAL = 2000;           // temps d'affichage d'une image (ms)
+const INTERVAL = 1499;           // temps d'affichage d'une image (ms)
 // La photo occupe TOUT l'écran (bord à bord, plein cadre) : le cadrage
 // (16:9 / 4:3 / 9:16) est choisi pour correspondre à l'écran, donc il n'y a
 // presque rien à rogner. Voir sizeImage().
@@ -88,6 +88,10 @@ function syncFormat() {
 // occupera à l'écran multipliée par la densité de l'écran.
 let entries = [];
 let loaded = new Map();   // i -> Image en cours de chargement / chargée
+// ordre d'affichage = permutation aléatoire des entrées, tirée À CHAQUE
+// VISITE (comme l'expérience diaporama). order[i] = indice dans entries ; on
+// lit ensuite les photos dans l'ordre order[0], order[1], … en boucle.
+let order = [];
 
 // La photo couvre toute la fenêtre : on ne réserve plus de place pour le logo
 // (il flotte par-dessus, en bas à gauche) ni de marge latérale.
@@ -125,12 +129,25 @@ function rebuild() {
     };
   });
   loaded.clear();
+  shuffle();
   stage.dataset.format = format;
   // dimensions intrinsèques exposées au CSS : permet de réserver la place
   // exacte de la photo avant même son chargement (pas de saut de mise en page)
   const ref = entries[0] || { w: 16, h: 9 };
   stage.style.setProperty('--nat-w', ref.w);
   stage.style.setProperty('--nat-h', ref.h);
+}
+
+// ---------------------------------------------------------------- ordre aléatoire
+// Fisher-Yates sur les indices (copie, non destructif) : le mélange change à
+// chaque chargement et à chaque changement de cadrage.
+function shuffle() {
+  const a = entries.map((_, i) => i);
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  order = a;
 }
 
 // ---------------------------------------------------------------- préchargement
@@ -155,7 +172,8 @@ function prefetch(from) {
 // toucher la barre du logo et sans déformation. Si le navigateur ne supporte
 // pas WebP, on retombe sur le JPEG.
 function sizeImage() {
-  const entry = entries[((current % entries.length) + entries.length) % entries.length];
+  const n = order.length;
+  const entry = entries[n ? order[((current % n) + n) % n] : 0];
   if (!entry) return;
   const box = layoutBox();
   // plein cadre : on dimensionne à la fenêtre entière et c'est object-fit:
@@ -189,15 +207,15 @@ const SUPPORTS_WEBP = (() => {
 })();
 
 function show(k, opts) {
-  const n = entries.length;
+  const n = order.length;
   if (!n) return;
-  const i = ((k % n) + n) % n;
+  const i = order[((k % n) + n) % n];   // position dans l'ordre → entrée réelle
   current = k;
   const entry = entries[i];
   const im = load(i);
 
   const paint = () => {
-    if (((current % n) + n) % n !== i) return;      // une autre photo a pris la main
+    if (order[((current % n) + n) % n] !== i) return;   // une autre photo a pris la main
     img.src = SUPPORTS_WEBP ? entry.src : entry.jpg;
     sizeImage();
   };
@@ -220,13 +238,47 @@ function tick() {
 }
 
 // ---------------------------------------------------------------- navigation
+// pas de boutons ‹ › dans la barre : clic (ou Espace / Entrée) sur la scène =
+// pause / reprise, flèches left/right = feuilleter (la lecture repart ensuite).
 function step(dir) {
-  if (!entries.length) return;
+  if (!order.length) return;
   show(current + dir);
   prefetch(current + dir);
   clearTimeout(timer);
   timer = setTimeout(tick, INTERVAL);
 }
+
+// ---------------------------------------------------------------- lecture / pause
+// #state (bas-gauche, à côté du logo) est le bouton lecture/pause : ▶︎ pendant
+// la lecture, ❚❚ en pause — même vocabulaire que l'expérience diaporama. La
+// photo elle-même reste un raccourci (clic / Espace), cf. plus bas.
+// le bouton #state suit l'état (libellé + aria-pressed) : il est le seul
+// contrôle explicite, le reste de la page n'est qu'un raccourci.
+const stateBtn = document.getElementById('state');
+function syncState() {
+  const paused = document.body.classList.contains('paused');
+  stateBtn.setAttribute('aria-pressed', String(paused));
+  stateBtn.setAttribute('aria-label', paused ? 'relancer le diaporama' : 'mettre le diaporama en pause');
+}
+
+function play() {
+  if (timer) return;
+  document.body.classList.remove('paused');
+  stage.setAttribute('aria-label', 'photo : cliquer pour mettre en pause le diaporama');
+  syncState();
+  timer = setTimeout(tick, INTERVAL);
+}
+
+function pause() {
+  if (!timer) return;
+  clearTimeout(timer);
+  timer = null;
+  document.body.classList.add('paused');
+  stage.setAttribute('aria-label', 'photo : cliquer pour relancer le diaporama');
+  syncState();
+}
+
+function toggle() { timer ? pause() : play(); }
 
 // ---------------------------------------------------------------- démarrage
 (async function start() {
@@ -242,12 +294,21 @@ function step(dir) {
   format = pickFormat();
   rebuild();
 
-  document.getElementById('btn-prev').addEventListener('click', () => step(-1));
-  document.getElementById('btn-next').addEventListener('click', () => step(1));
   window.addEventListener('keydown', (e) => {
     if (e.code === 'ArrowLeft') { e.preventDefault(); step(-1); }
     if (e.code === 'ArrowRight') { e.preventDefault(); step(1); }
+    // si #state a le focus, le navigateur déclenche déjà son clic (Entrée et
+    // Espace) : on s'abstient pour ne pas basculer deux fois.
+    if (e.code !== 'Space' && e.code !== 'Enter') return;
+    if (document.activeElement === stateBtn) return;
+    e.preventDefault();
+    toggle();
   });
+  // le bouton ▶︎ / ❚❚ : le contrôle principal
+  stateBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); toggle(); });
+  // clic sur la photo = même action (le logo mène au site : il garde sa
+  // navigation, on n'arrête pas la lecture en quittant la page)
+  stage.addEventListener('click', (e) => { e.preventDefault(); toggle(); });
   window.addEventListener('resize', onResize);
   window.addEventListener('orientationchange', () => setTimeout(onResize, 250));
 
@@ -264,6 +325,8 @@ function step(dir) {
 
   show(0);
   timer = setTimeout(tick, INTERVAL);
+  // état initial : la lecture tourne (▶︎ affiché dans #state)
+  play();
 
   // la barre d'URL mobile modifie la hauteur après le premier rendu : on fige
   // le cadrage une fois l'écran stabilisé (sans jamais changer de montage en

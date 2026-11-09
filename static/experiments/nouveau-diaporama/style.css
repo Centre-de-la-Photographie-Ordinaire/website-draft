@@ -80,37 +80,45 @@ html, body {
 #logo-tp:hover { opacity: 1; }
 #logo-tp img { display: block; height: 40px; width: auto; }
 
-/* boutons ‹ › : navigation photo précédente / suivante */
-.nav-btn {
-  width: 48px;
-  height: 48px;
+/* bouton lecture / pause : ▶︎ pendant le diaporama, ❚❚ en pause
+   (cf. body.paused). C'est un vrai <button> — il reçoit les clics et le
+   focus clavier ; la photo reste un raccourci. */
+#state {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   background: rgba(20, 23, 26, 0.45);
   border: 1px solid rgba(245, 239, 228, 0.35);
-  color: var(--accent);
-  font-size: 28px;
-  font-weight: 300;
-  font-family: "Times New Roman", Times, serif;
-  line-height: 1;
+  color: var(--ink);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  line-height: 1;
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
   backdrop-filter: blur(2px);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
-.nav-btn:hover {
+#state::before {
+  display: block;
+  font-size: 22px;
+}
+body:not(.paused) #state::before { content: "\25B6\FE0E"; }   /* ▶︎ */
+body.paused #state::before { content: "\275A\275A"; }          /* ❚❚ */
+#state:hover {
   background: rgba(250, 182, 23, 0.15);
   border-color: var(--accent);
+  color: var(--accent);
 }
-.nav-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#state:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 @media (max-width: 640px) {
   #bottom-bar { bottom: calc(14px + var(--sa-b)); left: calc(14px + var(--sa-l)); gap: 8px; padding: 6px 8px; }
   #logo-tp img { height: 32px; width: auto; }
-  .nav-btn { width: 40px; height: 40px; font-size: 22px; }
+  #state { width: 36px; height: 36px; }
+  #state::before { font-size: 18px; }
 }
 
 /* pointeur grossier (tactile) : pas d'état survol qui reste « collé » */
@@ -119,5 +127,5 @@ html, body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #logo-tp, .nav-btn { transition: none; }
+  #logo-tp, #state { transition: none; }
 }
