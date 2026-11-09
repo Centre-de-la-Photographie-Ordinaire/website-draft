@@ -27,6 +27,51 @@ hugo server         # mode dev, auto-reload
 L'URL finale sera `/experiments/<nom>/`. Ne pas créer de page Hugo du même
 nom : les fichiers statiques prennent la main.
 
+## collection : importer le répertoire
+
+La page `/collection/` n'est pas écrite à la main : elle est générée depuis le
+répertoire de la collection (un sous-dossier par collection, les images à
+l'intérieur).
+
+```sh
+tools/import-collection.py          # tout le répertoire
+tools/import-collection.py --only pti-oizo --force   # une seule collection
+tools/import-collection.py --dry-run                 # ce qui serait fait
+```
+
+Le script, pour chaque image source :
+
+1. **retire les bords blancs / unis** (papier du scan, passe-partout) — repère
+   par bord, robuste aux scans éclairés de travers, avec garde-fous ;
+2. **pose la photo sur une marge grise unie `#AEAEAE`** : la photo garde ses
+   proportions, centrée dans un cadre 4:3 paysage ;
+3. écrit deux **WebP** : vignette `480×360`/`360×480` et grande image
+   `2000×1500`/`1500×2000`, avec un budget de poids adaptatif (qualité puis
+   résolution : jamais plus de ~250 Ko pour la grande image) ;
+4. écrit l'index lu par la page : `data/collection.json` (Hugo le lit comme
+   `site.Data.collection`) et `static/collection/collections.json` (copie pour
+   inspection).
+
+Le script est **idempotent** : relancer sans option ne retraite que les images
+nouvelles ou modifiées (0,4 s quand tout est à jour). Changer la recette de
+cadre (la couleur de marge, par exemple) invalide tout automatiquement :
+l'empreinte de la recette est écrite dans `static/collection/recette.txt`.
+Les collections disparues du répertoire sont retirées du site.
+
+Dépendances : Python 3 + Pillow, ImageMagick 7 (`magick`).
+
+La page est un **accordéon** : une ligne par collection (nom + nombre d'images),
+une seule ouverte à la fois, comme avant. Le panneau ouvert contient la
+galerie : grande image au-dessus, bandeau de vignettes défilant en dessous
+(modèle romapublications). La galerie n'est construite qu'à l'ouverture du
+panneau : la page ne télécharge jamais les 532 vignettes d'un coup, seulement
+celles de la collection qu'on regarde.
+
+`layouts/partials/galerie.html` (liste + galerie), `static/collection/galerie.js`
+(navigation : vignettes, flèches, clavier ←/→, balayage, liens `#collection/N`).
+Le formulaire « prochaines parutions » (Formspree) est en bas de page ; son
+endpoint se règle dans `hugo.toml` (`params.formspree_collection`).
+
 ## panneaux « dialog » (haut-droite, jaune)
 
 Les trois liens de `/objet/` et les liens optionnels au dos des cartes de

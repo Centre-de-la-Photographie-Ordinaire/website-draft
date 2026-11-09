@@ -68,3 +68,12 @@ enableRobustParser = true
   name = "contact"
   pageRef = "/contact"
   weight = 11
+
+# ---------------------------------------------------------------------------
+# paramètres du site
+# ---------------------------------------------------------------------------
+[params]
+  # Formulaire « être prévenu des prochaines parutions » (bas de la page
+  # collection). Endpoint Formspree fourni par le client ; pour en changer,
+  # remplacer seulement l'identifiant après https://formspree.io/f/.
+  formspree_collection = "https://formspree.io/f/xrppwypr"
