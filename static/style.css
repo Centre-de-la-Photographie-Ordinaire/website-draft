@@ -1525,3 +1525,98 @@ body {
   .mission-face-arriere li { font-size: 0.9rem; }
 }
 /* === end missions === */
+
+/* ===== formulaire « être prévenu des parutions » (bas de /collection/) =====
+   Une seule ligne : libellé, champ, bouton (demande client 2026-11-12).
+   Sur une colonne étroite, le champ et le bouton passent à la ligne suivante. */
+.parutions {
+  margin: 3rem 0 1rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid rgba(245, 239, 228, 0.12);
+  max-width: 62rem;
+}
+.parutions-titre {
+  font-family: var(--font-titre);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.5rem;
+  color: var(--accent);
+}
+.parutions-intro {
+  max-width: 38rem;
+  margin: 0 0 1.1rem;
+  color: var(--dim);
+  font-size: 0.95rem;
+}
+
+.parutions-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.55rem 0.7rem;
+  max-width: 46rem;
+}
+.parutions-libelle {
+  font-size: 0.95rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.parutions-input {
+  flex: 1 1 16rem;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--ink);
+  background: rgba(20, 23, 26, 0.45);
+  border: 1px solid rgba(245, 239, 228, 0.3);
+  border-radius: 0;
+  padding: 0.5rem 0.7rem;
+}
+.parutions-input::placeholder { color: rgba(245, 239, 228, 0.35); }
+.parutions-input:focus { outline: 1px solid var(--accent); }
+
+.parutions-envoyer {
+  flex: 0 0 auto;
+  font-family: var(--font-titre);
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  color: var(--ardoise);
+  background: var(--accent);
+  border: none;
+  padding: 0.5rem 1.4rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.parutions-envoyer:hover { background: var(--ink); }
+.parutions-envoyer:disabled { opacity: 0.55; cursor: progress; }
+.parutions-envoyer:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* Pot de miel anti-robots : il doit être INVISIBLE pour l'humain mais rester
+   « remplissable » par un robot. On ne peut pas utiliser display:none ni
+   hidden — certains robots les ignorent — d'où le retrait hors écran. Sans
+   cette règle, le libellé « ne pas remplir » s'affichait sous le formulaire
+   (bug constaté en ligne, 2026-11-12). */
+.parutions-piege {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.parutions-message {
+  min-height: 1.4em;
+  margin: 0.7rem 0 0;
+  font-size: 0.92rem;
+}
+.parutions-message.est-ok { color: var(--accent); }
+.parutions-message.est-erreur { color: var(--orange); }
+.parutions-message.est-attente { color: var(--dim); }
+.parutions-noscript { margin: 0.7rem 0 0; font-size: 0.92rem; color: var(--dim); }
+
+@media (max-width: 560px) {
+  /* le champ prend toute la largeur, le bouton passe dessous */
+  .parutions-input { flex: 1 1 100%; }
+  .parutions-envoyer { flex: 1 1 auto; }
+}

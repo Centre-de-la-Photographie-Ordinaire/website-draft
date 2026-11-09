@@ -20,13 +20,13 @@
   </p>
 
   <form class="parutions-form" data-parutions-form action="{{ . }}" method="POST" novalidate>
-    <div class="parutions-champ">
-      <label class="parutions-libelle" for="parutions-email">votre adresse e-mail</label>
-      <input class="parutions-input" type="email" id="parutions-email" name="email"
-             autocomplete="email" inputmode="email" required
-             placeholder="prenom@exemple.fr" />
-    </div>
-    {{/* pot de miel anti-robots : invisible pour l'humain, pas pour le robot */}}
+    <label class="parutions-libelle" for="parutions-email">votre adresse e-mail</label>
+    <input class="parutions-input" type="email" id="parutions-email" name="email"
+           autocomplete="email" inputmode="email" required
+           placeholder="prenom@exemple.fr" />
+    {{/* pot de miel anti-robots : hors écran (cf. .parutions-piege). Le label
+         « ne pas remplir » s'adresse au robot, pas à l'humain : aria-hidden
+         suffit, le lien <label for> reste pour les robots qui le lisent. */}}
     <div class="parutions-piege" aria-hidden="true">
       <label for="parutions-gotcha">ne pas remplir</label>
       <input type="text" id="parutions-gotcha" name="_gotcha" tabindex="-1" autocomplete="off" />
