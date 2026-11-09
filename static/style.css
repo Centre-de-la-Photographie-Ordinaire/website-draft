@@ -54,7 +54,17 @@ body {
 .logo-lien { display: block; line-height: 0; flex-shrink: 0; }
 .logo { display: block; transition: transform 0.2s; }
 .logo-lien:hover .logo { transform: scale(1.04); }
+/* sur téléphone, le logo et les marges du header occupaient 202 px : le titre
+   du site n'avait plus la place de tenir sur une ligne. On récupère la largeur
+   en réduisant le logo et les marges (cpo-404). */
+@media (max-width: 560px) {
+  .site-header { gap: 0.6rem; padding: 0.8rem 0.9rem 0.7rem; }
+  .logo-lien .logo { height: 34px !important; }
+}
 .header-titres { flex: 1; min-width: 0; }
+/* Le titre du site tient sur UNE ligne (cpo-404) : « Centre de la
+   photographie ordinaire » ne se replie pas, même sur téléphone. La collection
+   passe en dessous, dans un .site-titre-collection (bloc, corps réduit). */
 .site-titre {
   font-family: var(--font-titre);
   font-size: clamp(1.05rem, 2.4vw, 1.55rem);
@@ -62,6 +72,28 @@ body {
   letter-spacing: 0.02em;
   line-height: 1.15;
 }
+/* le nom du site se dimensionne pour tenir sur une seule ligne. Mesuré au
+   navigateur : la phrase fait ~15,5 fois son corps en largeur (DIN condensé),
+   et le header retire ~11.4rem au viewport (logo, gouttières, marges,
+   hamburger — le logo est réduit à 34 px sous 560 px). Sous 560 px, le corps
+   suit donc la largeur réellement disponible plutôt que 2.4vw. Plafond
+   1.55rem = la taille des titres de page. */
+.site-titre-nom {
+  display: block;
+  white-space: nowrap;
+  font-size: clamp(0.7rem, calc((100vw - 11.4rem) / 15.6), 1.55rem);
+}
+.site-titre-collection {
+  display: block;
+  /* même calcul de largeur pour la collection (~13 fois son corps), plafonnée
+     à 82 % du corps du nom : la hiérarchie des deux lignes est gardée à tous
+     les paliers. Elle peut, elle, se replier si besoin. */
+  font-size: clamp(0.6rem, min(calc((100vw - 11.4rem) / 13.2), calc((100vw - 11.4rem) / 15.6 * 0.82)), 1.1rem);
+  white-space: normal;
+  letter-spacing: 0.01em;
+  opacity: 0.82;
+}
+
 .menu-wrap { flex-shrink: 0; position: relative; }
 .menu-toggle {
   display: flex;
@@ -308,13 +340,6 @@ body {
   display: block;
   border: 2px solid rgba(250, 182, 23, 0.3);
 }
-.expo-void {
-  display: inline-block;
-  padding: 0.6rem 1rem;
-  border: 1px dashed rgba(245, 239, 228, 0.3);
-  color: var(--dim);
-  font-size: 0.85rem;
-}
 @media (max-width: 700px) {
   .expo-layout { grid-template-columns: 1fr; gap: 1.2rem; }
   .expo-fixe { position: static; }
@@ -357,6 +382,61 @@ body {
 }
 .form-contact button:hover { background: var(--ink); }
 
+/* horaires : une ligne par jour, jour en DIN (comme les titres) et heures en
+   serif. Le lundi fermé reste lisible mais s'efface. */
+.horaires {
+  border-collapse: collapse;
+  margin: 0 0 1rem;
+  max-width: 34rem;
+}
+.horaires th,
+.horaires td {
+  text-align: left;
+  vertical-align: baseline;
+  padding: 0.35rem 1.6rem 0.35rem 0;
+  border-bottom: 1px solid rgba(245, 239, 228, 0.12);
+  font-weight: 400;
+}
+.horaires th {
+  font-family: var(--font-titre);
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  text-transform: lowercase;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.horaires time { white-space: nowrap; }
+.horaires-ferme td,
+.horaires-ferme th { color: var(--dim); }
+.horaires-note { color: var(--dim); font-size: 0.9rem; max-width: 34rem; }
+
+/* carte Leaflet — cadre dans la charte (filet jaune discret), hauteur fixe
+   pour que la carte existe avant le chargement du script. */
+.carte-simorre {
+  width: 100%;
+  max-width: 46rem;
+  height: 26rem;
+  margin: 0 0 2rem;
+  border: 1px solid rgba(250, 182, 23, 0.35);
+  background: #2A2E33;
+}
+.carte-simorre .carte-repli {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+}
+/* les tuiles OSM sont claires : on garde le texte de la carte lisible sur
+   le fond de la charte autour d'elles */
+.carte-simorre .leaflet-container { background: #2A2E33; font-family: var(--font-corps); }
+.carte-simorre .leaflet-popup-content { font-size: 0.85rem; }
+@media (max-width: 600px) {
+  .carte-simorre { height: 20rem; }
+}
+
 .site-footer {
   padding: 1.6rem 2rem;
   font-size: 0.78rem;
@@ -374,6 +454,12 @@ body {
 }
 .objet-col-texte { display: flex; flex-direction: column; gap: 1.1rem; line-height: 1.7; }
 .objet-col-texte p { margin: 0; }
+/* coupure de ligne avant la citation (cpo-404) : la première phrase du texte de
+   présentation se termine sur sa propre ligne, la collection « le commun des
+   mortels » ouvre la suivante. Le <br> du HTML fait la coupure ; la classe
+   .objet-citation garde une respiration au-dessus si la ligne se replie. */
+.objet-ligne-titre { display: inline; }
+.objet-citation { display: inline-block; margin-top: 0.15em; }
 /* ligne des trois liens légers, sous la photo (remplace la barre des 3 points —
    retour 2026-10-19), et leurs panneaux juste en dessous, dans le même <ul>.
    Style d'après objet-list-item.png : un disque jaune posé DERRIÈRE le texte,
@@ -394,8 +480,8 @@ body {
   position: relative;
   display: inline-flex;
   align-items: center;
-  /* la place du disque : il déborde à gauche du texte, comme sur la maquette */
-  padding: 0.45em 0 0.45em 0.62em;
+  /* icône devant le libellé, plus de place réservée pour la pastille */
+  padding: 0.35em 0;
   margin-right: 1.5rem;
   background: none;
   border: none;
@@ -408,33 +494,33 @@ body {
   isolation: isolate;
 }
 
-/* le disque : 3,7 × la hauteur du texte sur la maquette (objet-list-item.png),
-   soit un diamètre qui englobe le mot ; on l'exprime en em pour qu'il suive la
-   taille de la police. Posé derrière (z-index négatif), centré sur la ligne,
-   et débordant à gauche du texte comme sur la maquette. */
-.objet-lien-puce {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 3em;
-  height: 3em;
-  margin-top: -1.44em;
-  border-radius: 50%;
-  background: var(--accent);
-  z-index: -1;
-  transition: background-color 0.15s;
+/* la puce : le favicon du site (carré jaune, disque anthracite), à la taille
+   du texte, posé devant le libellé. Avant, une pastille jaune .objet-lien-puce
+   passait DERRIÈRE le mot (maquette objet-list-item.png) ; elle est remplacée
+   par l'icône de la marque (client 2026-11-09). */
+.objet-lien-icone {
+  flex: 0 0 auto;
+  width: 1.15em;
+  height: 1.15em;
+  margin-right: 0.5em;
+  background-image: url("favicon.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.9;
+  transition: opacity 0.15s, transform 0.15s;
 }
 .objet-lien-texte { position: relative; }
 
-/* pas de passage au jaune au survol : le texte deviendrait invisible
-   sur le disque jaune posé derrière. */
+/* pas de passage au jaune au survol du texte : le lien reste blanc chamois,
+   c'est l'icône qui s'affirme. */
 .objet-lien:hover { color: var(--ink); }
+.objet-lien:hover .objet-lien-icone,
+.objet-lien.active .objet-lien-icone { opacity: 1; transform: scale(1.06); }
 
-/* lien actif : texte jaune, disque blanc */
+/* lien actif (son panneau est ouvert) : texte jaune */
 .objet-lien.active { color: var(--accent); }
-.objet-lien.active .objet-lien-puce { background: var(--ink); }
 
-/* sur pointeur grossier, pas d'état survol qui reste « collé » */
 @media (hover: none) {
   .objet-lien:hover { color: var(--ink); }
 }
@@ -448,9 +534,10 @@ body {
   position: fixed;
   inset: 0.9rem 0.9rem auto auto;   /* haut 0.9 · droite 0.9 */
   margin: 0;
-  /* panneau compact en haut à droite (demande client) */
-  width: min(300px, calc(100vw - 1.8rem));
-  max-width: 300px;
+  /* panneau compact en haut à droite (demande client) — élargi (cpo-uzn) :
+     360 px de large, toujours ancré en haut à droite, hauteur max inchangée */
+  width: min(360px, calc(100vw - 1.8rem));
+  max-width: 360px;
   max-height: min(85vh, calc(100vh - 1.8rem));
   padding: 0;
   overflow: auto;
@@ -603,51 +690,23 @@ body {
   /* écran étroit : les trois liens tiennent sur une rangée malgré les disques
      qui débordent ; on resserre les marges entre liens. */
   .objet-liens { margin-top: 1.1rem; }
-  .objet-lien { font-size: 0.92rem; margin-right: 0.6rem; padding-left: 0.5em; }
-}
-/* ===== page 2 — missions : texte fixe haut + 4 pavés sur rectangle jaune =====
-   (retour client 2026-10-19 : un petit rectangle jaune derrière les pavés,
-   qui déborde INÉGALLEMENT et les lie entre eux ; les pavés sont opaques) */
-.missions-intro { margin-bottom: 2.2rem; max-width: 62rem; }
-.missions-intro p + p { margin-top: 1.1em; }
-.missions-jaune {
-  position: relative;
-  max-width: 50rem;
-  margin: 0 0 1.5rem;
-}
-/* le rectangle jaune — offsets NÉGATIFS ASYMÉTRIQUES = débordé inégal */
-.missions-jaune::before {
-  content: "";
-  position: absolute;
-  top: -18px;
-  left: -28px;
-  right: 36px;
-  bottom: -10px;
-  background: var(--accent);
-  z-index: 0;
-}
-.mission-pave {
-  position: relative;
-  z-index: 1;
-  background: var(--bg); /* opaque : le jaune ne transparaît pas dans le texte */
-  padding: 1.3rem 1.6rem 1.2rem;
-  margin: 0 0 1.15rem;
-}
-.mission-pave:last-child { margin-bottom: 0; }
-.mission-pave h3 {
-  font-family: var(--font-titre);
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  margin: 0 0 0.8em;
-  color: var(--ink);
+  .objet-lien { font-size: 0.92rem; margin-right: 0.6rem; }
 }
 /* ===== page 3 — agenda : images en ligne, contenu au clic =====
 .agenda-list {
+  display: block;
+  margin: 1.5rem 0;
+}
+/* une rangée de vignettes par <h2> : chaque groupe d'items consécutifs est
+   rendu en ligne qui se replie (cf. .agenda-row, posée par le JS en bas de
+   page — un <div> autour des <details> dans le Markdown casserait l'ordre
+   avec les titres). */
+.agenda-row {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  margin: 1.5rem 0;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
 }
 /* chaque item est une vignette de 160 px ; à l'ouverture il prend TOUTE la
    largeur de la rangée et le texte se place SOUS l'image.
@@ -663,6 +722,10 @@ body {
 .agenda-item[open] {
   flex: 1 0 100%;
   width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 1.6rem;
+  align-items: flex-start;
 }
 .agenda-item summary {
   list-style: none;
@@ -672,6 +735,27 @@ body {
   max-width: 100%;
 }
 .agenda-item summary::-webkit-details-marker { display: none; }
+/* une vignette-déclencheur (items « affiche ») : un vrai <button>, aucun
+   dépliant inline — le contenu s'ouvre dans le .objet-dialog agenda-panneau-*
+   en haut à droite (cpo-0xr). Le bouton ne doit pas se peindre en bouton
+   natif : c'est la vignette elle-même qui reste l'aspect cliquable. */
+.agenda-declencheur {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+.agenda-declencheur:focus-visible { outline: none; }
+.agenda-declencheur:focus-visible .agenda-image-frame,
+.agenda-declencheur.active .agenda-image-frame {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(250, 182, 23, 0.4);
+}
 .agenda-image-frame {
   display: block;
   width: 160px;
@@ -710,6 +794,99 @@ body {
   .agenda-item { width: 120px; }
   .agenda-image-frame { width: 120px; height: 120px; }
   .agenda-contenu { width: 100%; }
+}
+
+/* --- items « affiche » (expositions) : la vignette garde le format de
+   l'affiche (A2 portrait) au lieu d'un carré rogné ; les ateliers, eux, n'ont
+   que des visuels provisoires et restent carrés. ---------------- */
+.agenda-item[data-slug] .agenda-image-frame {
+  width: 160px;
+  height: auto;
+  aspect-ratio: 148 / 210;
+}
+.agenda-item[data-slug] .agenda-image-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+/* (l'ancienne règle [data-slug][open] ouvrait la vignette en grand dans la
+   liste ; remplacée par le panneau .agenda-dialog — cf. cpo-0xr) */
+
+.agenda-periode {
+  font-family: var(--font-titre);
+  font-size: 0.86rem;
+  letter-spacing: 0.14em;
+  text-transform: lowercase;
+  color: var(--accent);
+  margin-bottom: 0.8rem;
+}
+.agenda-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1.6rem;
+  margin-top: 1rem;
+}
+.agenda-lien {
+  font-family: var(--font-corps);
+  font-size: 0.95rem;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.agenda-lien:hover { text-decoration: underline; }
+.agenda-telecharger { color: var(--ink); }
+
+/* panneau d'une affiche : même <dialog> que la page objet, élargi pour une
+   affiche portrait (le panneau objet est calé à 300 px) */
+.agenda-dialog {
+  width: min(26rem, calc(100vw - 1.8rem));
+  max-width: min(26rem, calc(100vw - 1.8rem));
+}
+.agenda-dialog-periode {
+  font-family: var(--font-titre);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: lowercase;
+  margin: 0 0 0.7rem;
+}
+.agenda-dialog-affiche {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #000;
+  /* l'affiche vient APRÈS le bouton PDF (le texte se lit d'abord, puis on
+     télécharge, puis on regarde) : elle ferme le panneau, avec une marge */
+  margin-top: 0.9rem;
+}
+.agenda-dialog-telecharger { margin: 0.8rem 0 0; }
+.agenda-dialog-telecharger a {
+  display: inline-block;
+  font-family: var(--font-titre);
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  padding: 0.55em 1em;
+  background: #000;
+  color: var(--accent);
+  text-decoration: none;
+}
+.agenda-dialog-telecharger a:hover { background: var(--ink); color: #000; }
+
+@media (max-width: 700px) {
+  .agenda-item[data-slug] { width: 120px; }
+  .agenda-item[data-slug] .agenda-image-frame { width: 120px; height: auto; }
+  /* sur une colonne, la vignette repasse au-dessus du texte */
+  .agenda-item[open] {
+    flex-direction: column;
+    gap: 0;
+  }
+  .agenda-item[data-slug][open] .agenda-image-frame {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 /* ===== page 4 — collection : accordéon mono-ouvert ===== */
@@ -828,32 +1005,6 @@ body {
   padding: 0.4rem 0.7rem;
 }
 
-/* === design-fidelity override (auto-generated) === */
-/* To achieve the horizontal card layout, the container must be a flex row with gaps between cards. */
-.missions-jaune {
-  display: flex;
-  flex-direction: row;
-  gap: 1.6rem;
-  margin: 0 0 1.5rem;
-  padding: 0;
-}
-/* Each card must be a distinct, opaque block with a thin yellow border, and the layout must be a horizontal row. */
-.mission-pave {
-  position: relative;
-  z-index: 1;
-  background: var(--bg);
-  padding: 1.3rem 1.6rem 1.2rem;
-  margin: 0;
-  /* width/height retirés : le block « missions » plus bas gère
-     la largeur (track de grille) et la hauteur. Un width fixe ici
-     empêchait toute mise à l'échelle responsive. */
-  border: 1px solid var(--accent);
-}
-/* The large yellow rectangle behind the cards is not part of the design; it must be removed. */
-.missions-jaune::before {
-  content: none;
-}
-/* === end design-fidelity override === */
 
 /* texte lu par les lecteurs d'écran mais invisible (l'icône remplace le libellé) */
 .sr-only {
@@ -881,8 +1032,12 @@ body {
   gap: clamp(1.2rem, 2.4%, 2.6rem);
   max-width: none;
   width: 100%;
-  align-items: stretch;    /* les cartes d'une rangée ont la même hauteur */
-  grid-auto-rows: 1fr;
+  /* chaque carte prend SA hauteur de contenu, et la rangée celle de la plus
+     grande : les cartes restent alignées en haut. (stretch + rangée 1fr
+     donnaient une rangée plus haute que le contenu, sans rapport avec lui —
+     d'où des cartes de 513 px pour 390 px de texte.) */
+  align-items: start;
+  grid-auto-rows: auto;
   margin: 0 0 clamp(1.5rem, 3vw, 2rem);
   padding: 0;
   position: relative;
@@ -896,12 +1051,13 @@ body {
   margin: 0;
   padding: 0;
   min-width: 0;
-  align-self: stretch;
   min-height: clamp(15rem, 22vw, 20rem);
-  height: auto;
   overflow: visible;
   border: 1px solid var(--accent);
-  background: #000;
+  /* fond JAUNE de la carte : c'est celui de la face arrière, et il garantit
+     qu'elle couvre toute la carte même quand son texte est court. La face
+     avant, elle, a son propre fond noir. */
+  background: var(--accent);
   /* la perspective est portée par la carte, la rotation par l'intérieur */
   perspective: 1200px;
 }
@@ -909,9 +1065,15 @@ body {
 /* l'intérieur tourne ; ses deux faces sont superposées.
    Il remplit la hauteur de la rangée de grille (le contenu de la face avant
    ne suffit pas à la définir). */
+/* L'intérieur tourne et remplit la carte. La FACE AVANT est celle du flux :
+   elle donne sa hauteur à la carte (titre + bouton en bas à droite). La face
+   arrière est superposée en absolu : elle reçoit donc toujours la hauteur de
+   la carte, et son fond jaune la couvre entièrement, que son texte soit long
+   ou court. */
 .mission-interieur {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
@@ -927,21 +1089,34 @@ body {
   .mission-interieur { transition: none; }
 }
 
-/* --- une face ------------------------------------------------------------ */
+/* --- une face ------------------------------------------------------------
+   La FACE ARRIÈRE est la seule dans le flux : elle donne sa hauteur à la
+   carte, donc tout son texte tient et RIEN ne défile. La face avant est
+   posée par-dessus (absolute) et garde sa mise en page : titre centré dans
+   la hauteur, bouton-favicon collé en bas. */
 .mission-face {
-  /* chaque face occupe toute la carte */
-  position: absolute;
-  inset: 0;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   display: flex;
   flex-direction: column;
-  background: #000;
   padding: clamp(1rem, 1.4vw, 1.2rem) clamp(1rem, 1.7vw, 1.4rem) clamp(0.9rem, 1.3vw, 1.1rem);
-  overflow: hidden;        /* le défilement est porté par .card-text */
+  overflow: hidden;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
+/* FACE ARRIÈRE : c'est elle qui est dans le flux et qui donne sa hauteur à
+   la carte (c'est la face la plus longue) — tout son texte tient, le fond
+   jaune couvre la carte entière et rien ne défile. */
+.mission-face-arriere {
+  position: relative;
+  min-height: clamp(15rem, 22vw, 20rem);
+  overflow: visible;
+}
+/* FACE AVANT : superposée, donc toujours de la taille exacte de la carte ;
+   elle a son propre fond noir et son bouton dans le coin bas-droit. */
 .mission-face-avant {
+  position: absolute;
+  inset: 0;
+  background: #000;
   transform: rotateY(0deg);
   z-index: 0;
 }
@@ -959,34 +1134,53 @@ body {
   background: var(--accent);
   color: #000;
 }
+/* la face arrière est toute entière un bouton « retour » : le curseur main
+   doit apparaître sur TOUTE sa surface (titre, liste, marges), pas seulement
+   sur le texte — d'où le sélecteur descendant (cpo-p5d). Les liens qui ont
+   une action propre gardent leur propre curseur (voir plus bas). */
+.mission-pave.est-cliquable,
+.mission-pave.est-cliquable .mission-interieur,
+.mission-pave.est-cliquable .mission-face-arriere,
+.mission-pave.est-cliquable .mission-face-arriere * { cursor: pointer; }
 
 /* --- contenu des faces (vocabulaire card Bootstrap 5.1) ------------------ */
 .mission-pave .card-body {
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
-  /* la chaîne flex doit remplir la face pour que margin-top:auto du bouton
-     le colle réellement en bas */
+  /* la chaîne flex remplit la face ; le titre s'y centre (margin:auto) et le
+     bouton-favicon est posé dans le coin par la face elle-même */
   flex: 1 1 auto;
   min-height: 0;
   padding: 0;
 }
+.main .mission-pave .card-title,
 .mission-pave .card-title {
-  font-family: var(--font-titre);
-  font-size: clamp(0.92rem, 1.05vw, 1.05rem);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  line-height: 1.35;
-  margin: 0;
+  /* Spectral (la serif de la charte) et texte centré : les titres de mission
+     sont des phrases entières, la sans condensée les tassait (client
+     2026-11-09). Moins d'interlettrage que la version DIN, et un corps un
+     peu plus grand : la serif se lit moins bien en petit. */
+  font-family: var(--font-corps);
+  font-size: clamp(1rem, 1.15vw, 1.15rem);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  text-align: center;
+  /* le titre se centre verticalement ET horizontalement dans la face ; la
+     marge basse le tient au-dessus du bouton-favicon posé dans le coin.
+     (margin auto : il annule aussi les marges héritées de .main h3) */
+  margin: auto 0 0;
+  padding-bottom: 2.6rem;
   color: var(--ink);
 }
 .mission-pave .card-text {
   min-width: 0;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: auto;          /* liste longue : seul le texte défile */
-  /* filet de défilement discret, dans les couleurs de la charte */
-  scrollbar-width: thin;
+  /* pas de défilement interne (cpo-pql) : le texte est ENTIER sur la carte.
+     La face arrière est celle du flux, elle s'agrandit pour contenir son
+     texte (4 puces + lien = le cas le plus long, vérifié aux paliers 4/3/2/1
+     colonnes) ; overflow:visible en dernier recours plutôt qu'une barre. */
+  overflow: visible;
+  scrollbar-width: none;
 }
 
 .mission-pave .btn {
@@ -1007,45 +1201,59 @@ body {
   transition: background-color 0.15s, color 0.15s, border-color 0.15s;
 }
 .mission-pave .btn-primary {
-  /* bouton calé à DROITE, aligné sur le bord droit intérieur de la carte
-     (retour client 2026-11-06 : plus de bouton texte « détail › » à gauche) */
-  align-self: flex-end;
-  flex: 0 0 auto;
-  margin-top: auto;
   padding: 0.55em 0.85em;
   background: var(--accent);
   border-color: var(--accent);
   color: #000;
-  margin-right: 0;
+  margin: 0;
 }
-
-/* --- bouton-favicon de la face avant -------------------------------------
-   Le déclencheur de la face avant n'est plus un libellé texte mais l'icône
-   du site. Le favicon porte un liseré anthracite qui le rendrait invisible
-   sur le pavé noir : on l'agrandit à 155 % dans un cadre rogné, si bien que
-   le liseré tombe hors du cadre et qu'il ne reste que le carré jaune et le
-   disque anthracite (technique déjà utilisée avant cpo-me4, cf. a54fe4a). */
+/* le bouton-favicon de la face avant est collé au COIN BAS-DROIT de la carte
+   (demande client 2026-11-09), pas seulement poussé à droite sous le titre :
+   il est posé dans la marge intérieure de la face, qui est le coin de la
+   carte. Il reste au-dessus de la photo (z-index) et garde sa zone de clic. */
+.mission-pave .mission-face-avant .btn-favicon {
+  position: absolute;
+  right: clamp(1rem, 1.7vw, 1.4rem);
+  bottom: clamp(0.9rem, 1.3vw, 1.1rem);
+  z-index: 2;
+}
+/* sans le bouton dans le flux, le titre occupe toute la hauteur de la face et
+   reste centré (il garde une marge basse pour ne pas passer sous le bouton) */
+/* --- bouton-favicon (la face avant) --------------------------------------
+   Le déclencheur n'est plus un libellé texte mais l'icône du site. L'icône
+   est un vrai <img> (cpo-yfp) : un <img> aux dimensions naturelles, jamais
+   rogné, dans un cadre de BOUTON visible (cpo-5xb, demande client
+   2026-11-09 : « le favicon entier, pas rogné, format bouton »).
+   Le fond du bouton reprend le jaune de l'image et sa bordure l'anthracite du
+   liseré : le carré+disque se lit comme une icône posée dans un bouton, sur
+   le pavé noir. Tailles en px ENTIERS (pas de clamp en vw, qui donnait des
+   demi-pixels flous) : 2rem = 32 px sur ordinateur, 1.75rem = 28 px sur
+   téléphone. */
 .mission-pave .btn-favicon {
-  width: clamp(1.9rem, 2.4vw, 2.2rem);
-  height: clamp(1.9rem, 2.4vw, 2.2rem);
-  padding: 0;
-  border: 0;
-  background-color: transparent;
-  background-image: url("favicon.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 155%;
-  overflow: hidden;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0.15rem;
+  box-sizing: border-box;
+  border: 1px solid var(--accent);
+  background: var(--accent);
   /* le texte reste pour les lecteurs d'écran (.sr-only), il n'est jamais peint */
   font-size: 0;
   line-height: 0;
   color: transparent;
-  opacity: 0.92;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  opacity: 0.95;
+  transition: opacity 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
 }
-/* bouton TEXTE de la charte (aujourd'hui : les liens de la face arrière) :
-   il bascule en blanc chamois au survol. Les boutons-favicon en sont exclus
-   (:not(.btn-favicon)) : l'icône ne doit jamais changer de couleur. */
+.mission-pave .btn-favicon .btn-favicon-ico {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* l'image n'a pas de fond propre à rogner : contain la garde ENTIÈRE */
+  object-fit: contain;
+  image-rendering: auto;
+}
+/* bouton TEXTE de la charte : il bascule en blanc chamois au survol. Les
+   boutons-favicon en sont exclus (:not(.btn-favicon)) : l'icône ne doit
+   jamais changer de couleur. */
 .mission-pave .btn-primary:not(.btn-favicon):hover,
 .mission-pave .btn-primary:not(.btn-favicon):focus-visible {
   background: var(--ink);
@@ -1055,22 +1263,14 @@ body {
 }
 .mission-pave .btn-primary:not(.btn-favicon):focus-visible { box-shadow: 0 0 0 2px var(--accent); }
 
-/* --- bouton-favicon : survol et focus --------------------------------
-   Placé APRÈS les règles .btn-primary pour gagner la cascade. Seuls
-   l'opacité et l'échelle bougent : ni la couleur de fond, ni l'image. */
+/* survol / focus : seuls l'opacité et l'échelle bougent, jamais l'image */
 .mission-pave .btn-favicon:hover,
 .mission-pave .btn-favicon:focus-visible {
-  background-color: transparent;
-  background-image: url("favicon.png");
-  border-color: transparent;
-  color: transparent;
   opacity: 1;
-  transform: scale(1.08);
+  transform: scale(1.06);
   outline: none;
 }
-.mission-pave .btn-favicon:focus-visible {
-  box-shadow: 0 0 0 2px var(--accent);   /* anneau de focus visible */
-}
+.mission-pave .btn-favicon:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
 
 /* --- contenu de la face arrière ----------------------------------------- */
 .mission-retour-titre {
@@ -1082,38 +1282,6 @@ body {
   margin: 0;
   color: rgba(0, 0, 0, 0.62);
 }
-/* --- bouton-favicon de la face ARRIÈRE (retour vers la face avant) --------
-   Même icône que la face avant, alignée à droite : le geste est le même dans
-   les deux sens. */
-.mission-face-arriere .btn-favicon {
-  width: clamp(1.9rem, 2.4vw, 2.2rem);
-  height: clamp(1.9rem, 2.4vw, 2.2rem);
-  padding: 0;
-  border: 0;
-  background-color: transparent;
-  background-image: url("favicon.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 155%;
-  overflow: hidden;
-  font-size: 0;
-  line-height: 0;
-  color: transparent;
-  opacity: 0.92;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-.mission-face-arriere .btn-favicon:hover,
-.mission-face-arriere .btn-favicon:focus-visible {
-  /* pas de changement de couleur de l'icône ici non plus */
-  background-color: transparent;
-  background-image: url("favicon.png");
-  border-color: transparent;
-  color: transparent;
-  opacity: 1;
-  transform: scale(1.08);
-  outline: none;
-}
-.mission-face-arriere .btn-favicon:focus-visible { box-shadow: 0 0 0 2px #000; }
 
 /* liens optionnels de la face arrière (ils ouvrent le <dialog> haut-droite) */
 .mission-liens { margin: 0; }
@@ -1140,6 +1308,25 @@ body {
   display: grid;
   gap: 0.45rem;
 }
+/* une puce discrète devant chaque action. Une règle plus spécifique
+   (.mission-pave .card-text ul li) imposait déjà un rythme : on la neutralise
+   ici avec la même spécificité, en ramenant l'espacement au gap de la liste. */
+.mission-face-arriere li,
+.mission-pave .card-text ul li {
+  position: relative;
+  padding-left: 0.85em;
+  margin: 0;
+}
+.mission-face-arriere li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 0.32em;
+  height: 0.32em;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+}
 .mission-face-arriere li {
   line-height: 1.5;
   font-size: clamp(0.85rem, 0.95vw, 0.92rem);
@@ -1159,10 +1346,11 @@ body {
 }
 @media (max-width: 560px) {
   .missions-jaune { grid-template-columns: minmax(0, 1fr); gap: 1.3rem; }
-  /* une carte par rangée : la rangée n'impose plus de hauteur, et les faces
-     sont en position absolue — il faut donc la fixer explicitement.
-     La face arrière défile, la carte garde la même hauteur en tournant. */
-  .mission-pave { min-height: 26rem; }
+  /* une carte par rangée : plus rien n'impose de hauteur. La face arrière est
+     celle du flux et donne sa hauteur au contenu (tout le texte tient, sans
+     défilement, cpo-pql) : la carte prend donc SA hauteur, sans plancher
+     généreux qui laissait du jaune vide sous les cartes courtes. */
+  .mission-pave { min-height: 15rem; }
   .mission-face { padding: 1.1rem 1.1rem 1rem; }
 }
 @media (max-width: 380px) {

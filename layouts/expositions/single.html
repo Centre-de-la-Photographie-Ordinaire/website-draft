@@ -21,13 +21,14 @@
             <span class="expo-nom">{{ .nom }}</span>
             <span class="expo-meta">{{ .date }} · {{ .lieu }}</span>
           </summary>
+          {{/* pas de visuel : on n'émet pas .expo-visuel du tout — sinon le
+               <details> ouvrirait un cadre vide (l'ancien « à compléter » a été
+               retiré sur demande client 2026-11-09). */}}
+          {{ with .image }}
           <div class="expo-visuel">
-            {{ with .image }}
             <img src="{{ relURL . }}" alt="{{ $nom }}" loading="lazy">
-            {{ else }}
-            <span class="expo-void">à compléter</span>
-            {{ end }}
           </div>
+          {{ end }}
         </details>
       </li>
       {{ end }}

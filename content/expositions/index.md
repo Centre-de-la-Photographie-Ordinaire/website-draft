@@ -4,7 +4,6 @@ expos:
   - nom: "L'ÉTE PHOTOGRAPHIQUE DE LECTOURE 2025"
     date: "2025"
     lieu: "Lectoure (Gers)"
-    image: "images/expositions/2018-ete-photographique-lectoure.jpg"
   - nom: "LUSSAN MILLE PHOTOS"
     date: "2016"
     lieu: "Premier festival de la photo de famille, Lussan (Gers)"

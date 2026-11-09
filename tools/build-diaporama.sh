@@ -49,6 +49,19 @@ for spec in "${FORMATS[@]}"; do
       printf '%s\t%s\n' "$n" "$f"
     done | sort -n | cut -f2-
   )
+  # sources exclues (numéro final du nom de fichier) — « 18 » = visuels
+  # vitrine _18, écarté sur demande client (2026-11-09). Exclu ici, à la
+  # source, pour que la régénération reste reproductible.
+  EXCLUDE="${EXCLUDE:-18}"
+  kept=()
+  for f in "${files[@]}"; do
+    b="${f##*/}"; n="${b##*_}"; n="${n%.jpg}"
+    case " $EXCLUDE " in
+      *" $n "*) echo "  exclu : $b"; continue ;;
+    esac
+    kept+=("$f")
+  done
+  files=("${kept[@]}")
   [ ${#files[@]} -gt 0 ] || { echo "aucune source dans $dir" >&2; exit 1; }
 
   mkdir -p "$OUT/images/$name"
