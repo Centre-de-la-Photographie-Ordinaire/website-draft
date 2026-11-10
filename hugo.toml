@@ -15,7 +15,7 @@ enableRobustParser = true
 # sans préfixe « page N · » (retour client 2026-10-19).
 
 [[menu.main]]
-  name = "accueil"
+  name = "Accueil"
   pageRef = "/"
   weight = 1
 
