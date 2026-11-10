@@ -5,7 +5,7 @@ sansTitre: true
 
 <div class="objet-layout">
 <div class="objet-col-texte">
-<p><span class="objet-ligne-titre">Le Centre de la photographie ordinaire abrite la collection</span><br /><span class="objet-citation">« le commun des mortels »</span> : 3 000 000 de photographies de famille, classées en plus de 400 thèmes.</p>
+<p><span class="objet-ligne-titre">Le Centre de la photographie ordinaire abrite la collection :<br />3 000 000 de photographies de famille, classées en plus de 400 thèmes.</span></p>
 <p>3 000 000 de photographies amateurs et anonymes déploient un immense récit humain, du début de la photographie à nos jours. Le classement en plus de 400 thèmes révèle l'histoire du regard et des pratiques photographiques populaires.</p>
 <p>La collection sauvegarde ce patrimoine vernaculaire et œuvre à changer notre rapport aux photographies devenues anonymes.</p>
 </div>
@@ -14,7 +14,7 @@ sansTitre: true
 <figure class="objet-image-principale">
 <picture>
 <source srcset="{{< rel "images/bloc_objet.webp" >}}" type="image/webp">
-<img src="{{< rel "images/bloc_objet.jpg" >}}" alt="Photographies de la collection « le commun des mortels » — visuel du bicentenaire de la photographie" width="1400" height="1133" loading="eager" decoding="async">
+<img src="{{< rel "images/bloc_objet.jpg" >}}" alt="Photographies de la collection — visuel du bicentenaire de la photographie" width="1400" height="1133" loading="eager" decoding="async">
 </picture>
 </figure>
 
@@ -24,6 +24,18 @@ sansTitre: true
 
 </ul>
 </div>
+</div>
+
+<!-- pied de page de la page objet : le label du Bicentenaire (logos + mention),
+     repris de la page esprit. -->
+<div class="logo-partenaires objet-partenaires">
+  <div class="logo-cpo">
+    {{< logo size=96 >}}
+  </div>
+  <div class="logo-ministere">
+    <img class="logo-bicentenaire" src="{{< rel "images/bicentenaire_circle_logo.png" >}}" alt="Bicentenaire de la photographie 1826–2026" width="736" height="334">
+    <p class="mention-bicentenaire">De septembre 2026 à septembre 2027, les expositions et ateliers proposés sont du labellisés par le ministère de la Culture dans le cadre Bicentenaire de la Photographie</p>
+  </div>
 </div>
 
 <!-- Les « panneaux » sont des <dialog> natifs (cf. components/dialog, v6) :

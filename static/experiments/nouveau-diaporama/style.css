@@ -104,6 +104,8 @@ html, body {
 #state::before {
   display: block;
   font-size: 22px;
+  position: relative;
+  top: -3px;
 }
 body:not(.paused) #state::before { content: "\25B6\FE0E"; }   /* ▶︎ */
 body.paused #state::before { content: "\275A\275A"; }          /* ❚❚ */

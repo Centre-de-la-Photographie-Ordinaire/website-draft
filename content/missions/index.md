@@ -26,7 +26,7 @@ title: Missions
             <li>Expositions de la collection au sein du centre et hors les murs</li>
             <li>Édition et diffusion d'ouvrages</li>
             </ul>
-          <p class="mission-liens"><a href="#" class="mission-lien" data-dialog="mission-dialog-1" aria-expanded="false">donner ses photographies<span class="sr-only"> (s'ouvre dans un panneau)</span> →</a></p>
+          <p class="mission-liens"><a href="#" class="mission-lien" data-dialog="mission-dialog-1" aria-expanded="false">donner ses photographies<span class="sr-only"> (s'ouvre dans un panneau)</span></a></p>
           </div>
         </div>
       </div>
@@ -50,7 +50,7 @@ title: Missions
             <li>Ouverture du fonds aux chercheurs en anthropologie visuelle, histoire de la photographie, esthétique, sociologie…</li>
             <li>Implication des adhérents et habitants du territoire pour proposer des thèmes de résidence et de recherche</li>
             </ul>
-          <p class="mission-liens"><a href="#" class="mission-lien" data-dialog="mission-dialog-2" aria-expanded="false">en savoir plus sur les résidences<span class="sr-only"> (s'ouvre dans un panneau)</span> →</a></p>
+          <p class="mission-liens"><a href="#" class="mission-lien" data-dialog="mission-dialog-2" aria-expanded="false">en savoir plus sur les résidences<span class="sr-only"> (s'ouvre dans un panneau)</span></a></p>
           </div>
         </div>
       </div>

@@ -454,12 +454,15 @@ body {
 }
 .objet-col-texte { display: flex; flex-direction: column; gap: 1.1rem; line-height: 1.7; }
 .objet-col-texte p { margin: 0; }
-/* coupure de ligne avant la citation (cpo-404) : la première phrase du texte de
-   présentation se termine sur sa propre ligne, la collection « le commun des
-   mortels » ouvre la suivante. Le <br> du HTML fait la coupure ; la classe
-   .objet-citation garde une respiration au-dessus si la ligne se replie. */
+/* coupure de ligne dans la première phrase (cpo-404) : « … abrite la
+   collection : » se termine sur sa propre ligne, les chiffres ouvrent la
+   suivante. Le <br> du HTML fait la coupure. */
 .objet-ligne-titre { display: inline; }
-.objet-citation { display: inline-block; margin-top: 0.15em; }
+/* le titre de la ligne 1 ne doit pas hériter de la taille de bouton du logo du
+   pied de page (.logo-cpo .logo) */
+.objet-partenaires .logo { display: block; }
+/* pied de page de /objet/ : label Bicentenaire, filet au-dessus */
+.objet-partenaires { margin: 2.6rem 0 1rem; }
 /* ligne des trois liens légers, sous la photo (remplace la barre des 3 points —
    retour 2026-10-19), et leurs panneaux juste en dessous, dans le même <ul>.
    Style d'après objet-list-item.png : un disque jaune posé DERRIÈRE le texte,
@@ -853,16 +856,20 @@ body {
   text-transform: lowercase;
   margin: 0 0 0.7rem;
 }
+/* le texte ferme le panneau : un peu d'air au-dessus du premier paragraphe
+   qui suit le bouton de téléchargement */
+.agenda-dialog-telecharger + p { margin-top: 1.2rem; }
 .agenda-dialog-affiche {
   display: block;
   width: 100%;
   height: auto;
   border: 1px solid #000;
-  /* l'affiche vient APRÈS le bouton PDF (le texte se lit d'abord, puis on
-     télécharge, puis on regarde) : elle ferme le panneau, avec une marge */
-  margin-top: 0.9rem;
+  /* ordre du panneau (demande client 2026-11-10) : 1. l'affiche, 2. le bouton
+     de téléchargement, 3. le texte. L'affiche ouvre donc le panneau, sans
+     marge haute. */
+  margin-top: 0;
 }
-.agenda-dialog-telecharger { margin: 0.8rem 0 0; }
+.agenda-dialog-telecharger { margin: 0.8rem 0 1.2rem; }
 .agenda-dialog-telecharger a {
   display: inline-block;
   font-family: var(--font-titre);
@@ -1449,23 +1456,44 @@ body {
 /* (le titre « mission N » .mission-retour-titre a été retiré sur demande
    client : la face arrière commence directement par la liste des actions) */
 
-/* liens optionnels de la face arrière (ils ouvrent le <dialog> haut-droite) */
+/* liens optionnels de la face arrière (ils ouvrent le <dialog> haut-droite).
+   Le fond jaune de la face active donnait un lien jaune sur jaune : le texte
+   est noir plein, souligné, avec une puce ronde #2E3236 en SUFFIXE qui signale
+   le lien (retour client 2026-11-10). La règle générique `.main a` (jaune)
+   repeignait le lien : on la neutralise avec une double classe. */
 .mission-liens { margin: 0; }
-.mission-lien {
-  display: inline-block;
+.mission-liens .mission-lien {
+  /* inline (pas de flex) : le libellé se replie normalement sur la carte
+     étroite ; le flex éclatait le texte et repoussait la flèche à droite. */
+  display: inline;
   font-size: 0.82rem;
   color: #000;
   text-decoration: underline;
   text-underline-offset: 0.18em;
   transition: background-color 0.15s, color 0.15s;
 }
-.mission-lien:hover,
-.mission-lien:focus-visible {
+/* puce ronde anthracite après le libellé : le repère visuel du lien */
+.mission-lien::after {
+  content: "";
+  display: inline-block;
+  width: 0.4em;
+  height: 0.4em;
+  margin-left: 0.4em;
+  border-radius: 50%;
+  background: #2E3236;
+  /* la puce suit la dernière ligne du libellé, sans peser sur l'interligne */
+  vertical-align: 0.05em;
+}
+.mission-liens .mission-lien:hover,
+.mission-liens .mission-lien:focus-visible {
   background: #000;
   color: var(--accent);
   outline: none;
 }
-.mission-lien:focus-visible { box-shadow: 0 0 0 2px #000; }
+/* la puce suit le contraste : jaune sur le fond noir du survol */
+.mission-lien:hover::after,
+.mission-lien:focus-visible::after { background: var(--accent); }
+.mission-liens .mission-lien:focus-visible { box-shadow: 0 0 0 2px #000; }
 
 .mission-face-arriere ul {
   margin: 0;

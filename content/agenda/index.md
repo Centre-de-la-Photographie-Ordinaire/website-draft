@@ -34,12 +34,12 @@ title: Agenda
     </div>
     <div class="objet-dialog-corps">
       <p class="agenda-dialog-periode">Du 25 septembre au 14 Novembre 2026</p>
+      <img class="agenda-dialog-affiche" src="{{< rel "images/agenda/cest-une-femme-1000.jpg" >}}" alt="C’est une femme" width="1000" height="1363" loading="lazy" />
+      <p class="agenda-dialog-telecharger"><a href="{{< rel "documents/agenda/cest-une-femme.pdf" >}}" download>télécharger l’affiche (PDF)&nbsp;↓</a></p>
       <p>C’est une femme :</p>
       <p>C’est une femme, c’est une mère, c’est une sœur, c’est une jument, c’est une poule, c’est une lionne, c’est une chatte, c’est une maîtresse, c’est une suissesse, c’est une papesse, c’est une prophétesse, c’est une tigresse, c’est une druidesse, c’est une vicomtesse, c’est l’hôtesse, voilà une souveraine, une espagnole, une jardinière, une marchande, une ennemie et une bossue, ta sœur sera cantinière, dépenseuse, capitaine, victorieuse, générale poète médecin témoin professeur.</p>
       <p>2eme devoir 1851, Petit Séminaire Toulouse</p>
       <p>A la faveur de la découverte de ce texte, le centre présente des centaines d’images de femme de sa collection de photographies anonymes, amateurs.</p>
-      <p class="agenda-dialog-telecharger"><a href="{{< rel "documents/agenda/cest-une-femme.pdf" >}}" download>télécharger l’affiche (PDF)&nbsp;↓</a></p>
-      <img class="agenda-dialog-affiche" src="{{< rel "images/agenda/cest-une-femme-1000.jpg" >}}" alt="C’est une femme" width="1000" height="1363" loading="lazy" />
     </div>
   </dialog>
 
@@ -71,11 +71,11 @@ title: Agenda
     </div>
     <div class="objet-dialog-corps">
       <p class="agenda-dialog-periode">Du 27 Novembre au 9 Janvier 2026</p>
+      <img class="agenda-dialog-affiche" src="{{< rel "images/agenda/maison-et-jardin-1000.jpg" >}}" alt="Maison et Jardin" width="1000" height="1363" loading="lazy" />
+      <p class="agenda-dialog-telecharger"><a href="{{< rel "documents/agenda/maison-et-jardin.pdf" >}}" download>télécharger l’affiche (PDF)&nbsp;↓</a></p>
       <p>Maison et Jardin</p>
       <p>Maisons et jardins, du pavillon au manoir, du potager au parc : à chacun son chez-soi.</p>
       <p>Le Centre présente des centaines d’images d’intérieurs, de scènes de jardin et de lieux habités, du début de l’histoire de la photographie à nos jours, issues de sa collection de photographies amateurs anonymes.</p>
-      <p class="agenda-dialog-telecharger"><a href="{{< rel "documents/agenda/maison-et-jardin.pdf" >}}" download>télécharger l’affiche (PDF)&nbsp;↓</a></p>
-      <img class="agenda-dialog-affiche" src="{{< rel "images/agenda/maison-et-jardin-1000.jpg" >}}" alt="Maison et Jardin" width="1000" height="1363" loading="lazy" />
     </div>
   </dialog>
 
@@ -107,11 +107,11 @@ title: Agenda
     </div>
     <div class="objet-dialog-corps">
       <p class="agenda-dialog-periode">Du 29 Janvier au 13 Mars 2027</p>
+      <img class="agenda-dialog-affiche" src="{{< rel "images/agenda/chien-et-chat-1000.jpg" >}}" alt="Chiens et chats" width="1000" height="1363" loading="lazy" />
+      <p class="agenda-dialog-telecharger"><a href="{{< rel "documents/agenda/chien-et-chat.pdf" >}}" download>télécharger l’affiche (PDF)&nbsp;↓</a></p>
       <p>Chiens et chats</p>
       <p>Du maître ou du chien, qui domine l’autre ?</p>
       <p>Des centaines de photos de chiens … et aussi de chats, de la collection de photographie anonymes et amateurs.</p>
-      <p class="agenda-dialog-telecharger"><a href="{{< rel "documents/agenda/chien-et-chat.pdf" >}}" download>télécharger l’affiche (PDF)&nbsp;↓</a></p>
-      <img class="agenda-dialog-affiche" src="{{< rel "images/agenda/chien-et-chat-1000.jpg" >}}" alt="Chiens et chats" width="1000" height="1363" loading="lazy" />
     </div>
   </dialog>
 
