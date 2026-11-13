@@ -56,8 +56,14 @@ poignée d'images**, une par photo affichée, dans le seul montage retenu.
 
 La photo est dimensionnée par `main.js` en **plein cadre** (bord à bord, toute
 la fenêtre), puis `object-fit: cover` absorbe l'écart résiduel entre le cadrage
-et l'écran. La barre logo/‹ › flotte par-dessus la photo, en bas à gauche, avec
-un fond diffus pour rester lisible quelle que soit l'image.
+et l'écran. La barre « Entrer »/‹ › flotte par-dessus la photo, en bas à gauche.
+
+Le bouton de la barre basse dit **« Entrer »**, texte noir sur fond jaune
+(`--accent` #FAB617), dans la fonte des titres du site (DINdong). Il remplace
+l'image du logo horizontal depuis le retour client du 2026-11-13. Son `@font-face`
+est déclaré dans le `style.css` de l'expérience ; `tools/sync-staging.sh` du
+dépôt `.github.io` réécrit son chemin (`../../fonts/` -> `../fonts/`) quand le
+diaporama est publié à la racine du site d'organisation.
 Les préchargements `<link rel=preload>` de `index.html` suivent la même logique
 de montage que `main.js` ; si on modifie les seuils de `main.js`, les mettre à
 jour ici aussi.
