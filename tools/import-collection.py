@@ -6,23 +6,33 @@ mortels » dans le site.
    usage : tools/import-collection.py [options] [DOSSIER_SOURCE]
 
    DOSSIER_SOURCE : racine du répertoire ; un sous-dossier par collection.
-                    défaut : /home/alx/code/centre-de-la-photographie-ordinaire/répertoire/
+                    défaut : /home/alx/org/projects/professional/commundesmortels/répertoire/
 
-Pour chaque image source :
-  1. recadrage des bords blancs / unis (papier du scan, passe-partout) —
-     cf. « recadrage » plus bas ;
-  2. réduction dans le cadre 4:3 paysage de la page collection, ratio
-     constant, photo centrée sur la marge grise unie #AEAEAE (une photo
-     portrait est posée debout au centre : elle n'est ni déformée ni rognée) :
-        vignette 480x360   grande image 2000x1500 ;
-  3. écriture en WebP (qualité réglable) de deux variantes :
-        <slug>/<slug>-NN-thumb.webp   bandeau de vignettes
-        <slug>/<slug>-NN-large.webp   grande image
+Pour chaque image source, la photo est publiée ENTIÈRE (aucun recadrage), à ses
+proportions, posée sur un cadre de gris uni #AEAEAE qui lui ajoute une marge :
+
+  • gauche/droite : max(2 % de la largeur du cadre, 24 px) ;
+  • haut/bas      : max(1,5 % de la largeur de la photo, 20 px).
+
+Le cadre suit donc le format de la photo (un portrait reste un portrait) : il
+n'est plus imposé en 4:3. L'index publie la largeur et la hauteur réelles de
+chaque sortie, ce qui permet à la page de réserver la bonne place avant
+chargement et de composer un srcset.
+
+Chaque photo est écrite en quatre largeurs WebP (srcset) :
+     <slug>/<slug>-NN-480.webp     bandeau de vignettes
+     <slug>/<slug>-NN-960.webp     mobile / petite fenêtre
+     <slug>/<slug>-NN-1440.webp    bureau
+     <slug>/<slug>-NN-2000.webp    grande image (écran HiDPI)
+
+Le suffixe est la largeur du CADRE (photo + marges), pas celle de la photo :
+c'est la seule valeur utilisable dans un srcset, puisque le fichier est de
+cette largeur-là.
 
 Puis écrit l'index lu par la page :
-        static/collection/collections.json
+        static/collection/collections.json   (+ copie data/collection.json)
 
-Le script est idempotent : une image est sautée quand ses deux sorties sont
+Le script est idempotent : une image est sautée quand toutes ses sorties sont
 plus récentes que la source (option --force pour tout refaire). Les collections
 disparues du répertoire sont retirées de static/collection/ (option --keep pour
 les conserver).
@@ -33,12 +43,18 @@ Options
   --force          refaire même les images déjà à jour
   --dry-run        afficher ce qui serait fait, sans rien écrire
   --keep           ne pas supprimer les dossiers de collections absentes
-  --quality-large  qualité WebP de la grande image (défaut 78)
-  --quality-thumb  qualité WebP de la vignette (défaut 72)
+  --quality-large  qualité WebP de la plus grande sortie (défaut 78)
+  --quality-thumb  qualité WebP de la vignette 480 (défaut 72)
   --workers N      encodages ImageMagick en parallèle (défaut : CPU - 1)
 
-Dépendances : Python 3 + Pillow (recadrage), ImageMagick 7 (`magick`, encodage
-et rééchantillonnage de qualité).
+Dépendances : Python 3 + Pillow, ImageMagick 7 (`magick`, encodage et
+rééchantillonnage de qualité).
+
+Historique des recettes (cf. recipe_stamp()) :
+  • 2026-11-09 → 2026-11-17 : recadrage des bords blancs/unis, cadre 4:3 fixe,
+    deux sorties (-thumb 480x360, -large 2000x1500) ;
+  • depuis 2026-11-17 (retour client) : plus de recadrage, cadre au format de
+    la photo + marges grises G/D haut/bas, quatre sorties pour le srcset.
 """
 
 from __future__ import annotations
@@ -56,11 +72,14 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
-from PIL import Image, ImageFilter
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent  # website-draft/
+# Source de vérité UNIQUE du répertoire (décision client 2026-11-17).
+# L'ancien /home/alx/code/centre-de-la-photographie-ordinaire/répertoire/ a été
+# archivé puis supprimé : ses images ne doivent pas être utilisées.
 DEFAULT_SRC = Path(
-    "/home/alx/code/centre-de-la-photographie-ordinaire/répertoire"
+    "/home/alx/org/projects/professional/commundesmortels/répertoire"
 )
 OUT_ROOT = ROOT / "static" / "collection"
 # empreinte de la recette de cadre (cf. fresh()) : sert seulement à invalider
@@ -71,30 +90,44 @@ STAMP_NAME = "recette.txt"
 # static/collection/.
 DATA_INDEX = ROOT / "data" / "collection.json"
 
-# formats de sortie — le fond gris clair est ajouté par le CSS autour de
-# l'image ; ces dimensions sont donc celles de l'image elle-même.
-# Un seul format de cadre, en PAYSAGE (retour client 2026-11-09 : « every
-# picture should be in landscape mode »). Une photo portrait est posée debout
-# au centre de ce cadre : elle garde ses proportions, entourée de fond gris.
-# Le bandeau de vignettes et la grande image restent donc alignés quel que soit
-# le format des sources.
-FRAME = (4, 3)
-THUMB_W = 480   # largeur de la vignette (360 de haut, en 4:3)
-LARGE_W = 2000  # largeur de la grande image (1500 de haut, en 4:3)
+# Largeurs du srcset, en largeur de CADRE pour les photos paysage et carrées.
+#
+# ATTENTION : pour un portrait, la valeur est le GRAND côté (la hauteur), pas la
+# largeur. Le cadre suit le format de la photo depuis le 2026-11-17 : un
+# portrait en 2000 px de large ferait 3200 px de haut, soit 6,3 Mpx pour une
+# photo qui en occupe 1,1 — trois fois le poids de l'ancien cadre 4:3, pour un
+# détail que personne ne voit. En bornant le GRAND côté, « 2000 » veut dire la
+# même chose dans les deux sens : 2000 px de haut pour un portrait, 2000 px de
+# large pour un paysage.
+WIDTHS = (480, 960, 1440, 2000)
+THUMB_W = WIDTHS[0]
+LARGE_W = WIDTHS[-1]
 
-# Marge autour de la photo — gris neutre uni #AEAEAE (retour client 2026-11-12 :
-# « margin color should be #aeaeae »). Plus de dégradé : les images portent
-# cette couleur plate, le CSS n'ajoute que l'ombre. Même cadre à toutes les
-# tailles, et pas de dégradé figé dans un fichier WebP. La constante est
-# utilisée pour invalider les fichiers déjà générés (cf. EMPREINTE).
+# Marges du cadre — gris neutre uni #AEAEAE (retour client 2026-11-12 : « margin
+# color should be #aeaeae »). Les marges sont calculées sur la largeur du cadre
+# et converties en pixels entiers ; elles sont donc plus épaisses en valeur
+# absolue sur la grande image que sur la vignette, à proportion égale.
+# Retour client 2026-11-17 : « add small top/bottom margins », d'où le
+# supplément vertical qui n'existait pas avant (le cadre 4:3 collait la photo
+# en haut et en bas dès qu'elle était en paysage).
 TEXTURE = (174, 174, 174)  # #AEAEAE
+MARGIN_X_RATIO = 0.02   # 2 % de la largeur du cadre, de chaque côté
+MARGIN_X_MIN = 24       # plancher en pixels, sur la plus grande sortie
+MARGIN_Y_RATIO = 0.015  # 1,5 % de la largeur de la photo, en haut et en bas
+MARGIN_Y_MIN = 20       # plancher en pixels, sur la plus grande sortie
 
-MIN_OUTPUT = 320   # sous cette taille, la mise en page n'a plus de sens
 MIN_QUALITY = 60   # plancher de la qualité adaptative
-# poids cible : les scans à grain dépassent facilement 500 Ko à q78 ; la page
-# affiche la grande image à ~1000 px de large, ces poids-là ne se voient pas.
-LARGE_MAX_BYTES = 250 * 1024
-THUMB_MAX_BYTES = 45 * 1024
+# Budget de poids par palier, en octets. Le srcset évite de servir du 2000 px
+# sur mobile ; ces budgets bornent ce que coûte le pire cas (desktop HiDPI).
+MAX_BYTES = {
+    480: 45 * 1024,
+    960: 110 * 1024,
+    1440: 190 * 1024,
+    2000: 250 * 1024,
+}
+# sous ce rapport, une image est un bandeau : on la garde telle quelle (plus de
+# recadrage automatique), mais on la signale dans le compte rendu.
+SKINNY_AR = 3.0
 
 SOURCE_EXT = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".webp", ".psd"}
 # fichiers présents dans le répertoire mais non publiables :
@@ -142,327 +175,137 @@ def source_key(path: Path) -> tuple:
 
 
 # --------------------------------------------------------------------------
-# recadrage des bords blancs / unis
+# cadre : la photo entière + marges grises
 # --------------------------------------------------------------------------
 #
-# Les sources sont des scans : photo sur papier blanc, tirage posé sur un fond
-# caramel, négatif sur passe-partout… Le bord utile est le rectangle de pixels
-# qui diffèrent du fond *relié au bord de l'image* — c'est ce qu'un humain
-# découpe. On le mesure ligne par ligne, colonne par colonne :
+# Le recadrage des bords blancs / unis a été retiré le 2026-11-17 (décision
+# client) : la photo est publiée telle quelle, y compris les marges du papier
+# du scan ou du passe-partout quand il y en a. C'est un choix assumé — le
+# cadrage serré manuel se fait en amont, dans le répertoire.
 #
-#   • un pixel « fond » est neutre (faible écart entre canaux) ET proche de la
-#     couleur de référence (médiane du bord, qui absorbe le grain du papier) ;
-#   • une bande (ligne/colonne) est supprimée seulement si TOUS ses pixels sont
-#     du fond — une ligne qui garde un centimètre de photographie ne l'est pas ;
-#   • le bord de référence est vérifié au centre ET dans les proches bandes
-#     suivantes : sur un scan de tirage sur papier blanc (cf. « bébé cadum »),
-#     les marges du papier sont blanches aussi au bord du tirage, et on ne
-#     déborderait sur la photo qu'après plusieurs dizaines de pixels — la
-#     vérification sur une fenêtre de 2 % de la dimension la coupe net ;
-#   • garde-fous : jamais plus de MAX_TRIM de chaque côté (un négatif sur fond
-#     très clair reste entier), et si le résultat est invraisemblable (trop
-#     petit, format de bandeau), on ne recadre pas.
+# Ce qui reste à calculer, c'est le cadre : la taille de sortie pour une
+# largeur de cadre donnée, et la position de la photo dedans.
 
-TRIM_TOL = 30          # écart max à la couleur de fond (0-255, par canal)
-EDGE_TOL = 34          # idem, contre la référence de fond de la colonne
-NEUTRAL_TOL = 36       # écart max entre canaux pour un pixel « neutre »
-MAX_TRIM = 0.2         # au plus 20 % retiré de chaque côté
-WIN_MIN = 3            # fenêtre de vérification du bord, en pixels (min/max)
-WIN_MAX = 40
-WIN_FACTOR = 0.5       # fenêtre = 50 % de la marge trouvée, bornée
+def margin_px(frame_w: int, photo_w_ratio: float) -> tuple[int, int]:
+    """Marges (x, y) en pixels pour un cadre de largeur `frame_w`.
+
+    Les planchers (MARGIN_X_MIN, MARGIN_Y_MIN) sont donnés pour la plus grande
+    sortie et passent à l'échelle en dessous, sinon les marges d'une vignette
+    de 480 px mangeraient un dixième de l'image."""
+    scale = frame_w / LARGE_W
+    mx = max(round(MARGIN_X_RATIO * frame_w), round(MARGIN_X_MIN * scale)) or 1
+    my = max(round(MARGIN_Y_RATIO * frame_w * photo_w_ratio),
+             round(MARGIN_Y_MIN * scale)) or 1
+    return mx, my
 
 
-class Crop:
-    """Rectangle source (l, t, r, b) et raison de l'avoir choisi."""
+def frame_dims(im: Image.Image, frame_w: int) -> tuple[int, int, int, int]:
+    """Dimensions du cadre et marges pour une photo, au grand côté demandé.
 
-    def __init__(self, box, why):
-        self.box = box
-        self.why = why
+    Retourne (largeur, hauteur, marge_x, marge_y). La photo garde ses
+    proportions exactes ; le cadre est la photo + les marges. Le format du
+    cadre suit donc celui de la photo.
 
-    @property
-    def size(self):
-        l, t, r, b = self.box
-        return r - l, b - t
-
-    def __repr__(self):
-        w, h = self.size
-        return f"Crop({self.box}, {w}x{h}, {self.why})"
-
-
-def _pixels(im: Image.Image):
-    return im.load()
-
-
-def _border_reference(im: Image.Image, edge: str):
-    """Couleur de fond d'un bord de l'image : médiane des pixels de ce bord.
-
-    Une référence UNIQUE pour les quatre bords ne marche pas : les scans sont
-    souvent éclairés de travers (« no comment » : le papier va de #D0D0C8 à
-    gauche à #FEFEFE à droite). Chaque bord a donc sa propre référence.
-
-    Deux passes : médiane brute, puis médiane des seuls pixels déjà proches
-    d'elle — un liseré de 1 px plus sombre (bord du scan, ombre portée) ne
-    doit pas tirer la référence."""
-    W, H = im.size
-    px = _pixels(im)
-    if edge == "top":
-        samples = [px[x, 0] for x in range(0, W, max(1, W // 128))]
-    elif edge == "bottom":
-        samples = [px[x, H - 1] for x in range(0, W, max(1, W // 128))]
-    elif edge == "left":
-        samples = [px[0, y] for y in range(0, H, max(1, H // 128))]
-    else:
-        samples = [px[W - 1, y] for y in range(0, H, max(1, H // 128))]
-
-    def median(cols):
-        chans = list(zip(*cols))
-        return tuple(sorted(c)[len(c) // 2] for c in chans)
-
-    ref = median(samples)
-    close = [c for c in samples
-             if max(abs(c[0] - ref[0]), abs(c[1] - ref[1]), abs(c[2] - ref[2])) <= TRIM_TOL]
-    if len(close) >= len(samples) // 2:
-        ref = median(close)
-    return ref
+    `frame_w` est le GRAND côté du cadre : la largeur pour un paysage, la
+    hauteur pour un portrait (cf. WIDTHS). C'est ce qui garde un poids
+    comparable entre les deux orientations."""
+    photo_ratio = im.height / im.width
+    is_portrait = photo_ratio > 1
+    # largeur nominale du cadre : pour un portrait, on la déduit de la hauteur
+    # voulue, une fois les marges connues (elles sont proportionnelles, on les
+    # estime sur la largeur nominale puis on les recalcule).
+    frame_w = frame_w
+    if is_portrait:
+        mx, my = margin_px(frame_w, photo_ratio)
+        photo_h = frame_w - 2 * my
+        frame_w = max(WIDTHS[0], round(photo_h / photo_ratio) + 2 * mx)
+    mx, my = margin_px(frame_w, photo_ratio)
+    photo_w = frame_w - 2 * mx
+    photo_h = max(1, round(photo_w * photo_ratio))
+    return frame_w, photo_h + 2 * my, mx, my
 
 
-def _is_background(c, ref) -> bool:
-    if abs(c[0] - c[1]) > NEUTRAL_TOL or abs(c[1] - c[2]) > NEUTRAL_TOL or abs(c[0] - c[2]) > NEUTRAL_TOL:
-        return False  # couleur franche : c'est de la photo
-    return max(abs(c[0] - ref[0]), abs(c[1] - ref[1]), abs(c[2] - ref[2])) <= TRIM_TOL
+def frame_photo(im: Image.Image, frame_w: int) -> Image.Image:
+    """Pose la photo, à ses proportions, au centre d'un cadre gris.
 
-
-def find_content_box(im: Image.Image) -> Crop | None:
-    """Rectangle du contenu, bords unis retirés, ou None si rien de net."""
-    W, H = im.size
-    med = im.filter(ImageFilter.MedianFilter(3))  # grain / poussière
-    px = _pixels(med)
-
-    # fenêtre de vérification : quand on croit avoir trouvé le bord, on exige
-    # que les `win` pixels suivants (dans l'image) ne soient pas du fond — sinon
-    # le « bord » est encore une marge (papier du tirage, etc.).
-    #
-    # Largeur de la fenêtre : proportionnelle à la marge trouvée, dans
-    # [WIN_MIN, WIN_MAX]. Sur un scan de tirage (cf. « no comment »), la marge
-    # du papier fait ~13 px sur 2077 : une fenêtre fixe à 2 % (41 px) ferait
-    # échouer la vérification et la marge resterait. À l'inverse, sur un scan
-    # où la photo est posée sur du papier blanc (cf. « bébé cadum »), la marge
-    # fait des dizaines de pixels et il faut la couper. WIN_MIN = 3 px empêche
-    # de confondre le grain d'une marge de 1-2 px avec le bord.
-    win_x = win_y = WIN_MIN
-
-    # garde-fou : au plus MAX_TRIM retiré, et toujours assez de place pour que
-    # la fenêtre de vérification reste dans l'image.
-    max_l = min(int(W * MAX_TRIM), W - win_x - 2)
-    max_t = min(int(H * MAX_TRIM), H - win_y - 2)
-    if max_l < 1 or max_t < 1:
-        return None
-
-    # Recherche par bissection (deux passes) : 1) combien de bandes de fond
-    # depuis le bord, en O(log) comparaisons ; 2) ce retrait est-il légitime au
-    # regard de la fenêtre ? Coût constant par bord, ce qui rend l'import
-    # instantané sur 534 images.
-    def trim_edge(edge: str) -> int:
-        """Bandes de fond à retirer depuis `edge` ('top'|'bottom'|'left'|'right')."""
-        along = "x" if edge in ("top", "bottom") else "y"
-        reverse = edge in ("bottom", "right")
-        # along_len : longueur des bandes le long du bord ; across_len : nombre
-        # de bandes empilées depuis ce bord (la dimension qu'on rogne).
-        along_len = W if along == "x" else H
-        across_len = H if along == "x" else W
-        limit = max_l if along == "x" else max_t
-        ref = _border_reference(im, edge)
-
-        # la couleur du fond varie lentement le long du bord (éclairage) : on
-        # échantillonne par colonnes, chacune avec SA référence de fond prise
-        # dans la bande de bord — une bande est « fond » si chaque colonne
-        # correspond à sa propre référence.
-        step = max(1, along_len // 200)
-        cols = list(range(0, along_len, step))
-        refs = {}
-        for i in cols:
-            # référence de la colonne i : pixel de bord de cette colonne
-            if edge in ("top", "bottom"):
-                y = 0 if edge == "top" else H - 1
-                refs[i] = px[i, y]
-            else:
-                x = 0 if edge == "left" else W - 1
-                refs[i] = px[x, i]
-
-        def is_bg(i, k) -> bool:
-            fixed = across_len - 1 - k if reverse else k
-            c = px[i, fixed] if along == "x" else px[fixed, i]
-            r = refs[i]
-            if abs(c[0] - c[1]) > NEUTRAL_TOL or abs(c[1] - c[2]) > NEUTRAL_TOL \
-                    or abs(c[0] - c[2]) > NEUTRAL_TOL:
-                return False  # couleur franche : c'est de la photo
-            return max(abs(c[0] - r[0]), abs(c[1] - r[1]), abs(c[2] - r[2])) <= EDGE_TOL
-
-        def all_bg(a, b) -> bool:
-            """Les bandes [a, b) sont-elles toutes du fond ?"""
-            for k in range(a, b):
-                for i in cols:
-                    if not is_bg(i, k):
-                        return False
-            return True
-
-        # frontière : plus grand n tel que les bandes [0, n) soient du fond
-        lo, hi = 0, limit + 1
-        while lo + 1 < hi:
-            mid = (lo + hi) // 2
-            if all_bg(0, mid):
-                lo = mid
-            else:
-                hi = mid
-        n_bg = lo
-        if n_bg == 0:
-            return 0
-        # on ne retire que si la fenêtre qui suit le retrait contient de la
-        # photo : sinon le bord est encore dans une marge unie (papier du
-        # tirage, passe-partout), et recadrer mangerait la photographie.
-        win = min(WIN_MAX, max(WIN_MIN, int(n_bg * WIN_FACTOR)))
-        for k in range(n_bg, min(n_bg + win, across_len)):
-            for i in cols:
-                if not is_bg(i, k):
-                    return n_bg  # de la photo suit → retrait légitime
-        return 0  # marge plus épaisse que la fenêtre : on n'y touche pas
-
-    l = trim_edge("left")
-    r = trim_edge("right")
-    t = trim_edge("top")
-    b = trim_edge("bottom")
-
-    box = (l, t, W - r, H - b)
-    w, h = box[2] - box[0], box[3] - box[1]
-    if w < W * 0.6 or h < H * 0.6 or w < 32 or h < 32:
-        return None
-
-    # une photo déjà proche du plein cadre ne mérite pas de recadrage
-    if (l, t, r, b) == (0, 0, 0, 0):
-        return None
-    # on ignore un liseré d'un ou deux pixels (bruit du scan)
-    if max(l, r, t, b) <= 2:
-        return None
-    return Crop(box, f"bords retirés l{l} t{t} r{r} b{b}")
-
-
-def centered_box(im: Image.Image, ratio: tuple[int, int]) -> Crop:
-    """Plus grand rectangle au format demandé, centré."""
-    W, H = im.size
-    rw, rh = ratio
-    if W / H > rw / rh:  # trop large : on rogne les côtés
-        w = int(round(H * rw / rh))
-        l = (W - w) // 2
-        return Crop((l, 0, l + w, H), "centré (format)")
-    h = int(round(W * rh / rw))
-    t = (H - h) // 2
-    return Crop((0, t, W, t + h), "centré (format)")
-
-
-def choose_crop(im: Image.Image) -> Crop:
-    """Recadrage réel appliqué : bords unis retirés, et si le résultat est
-    encore loin du format de la page (bandeau), on recadre au centre."""
-    found = find_content_box(im)
-    box = found.box if found else (0, 0, im.size[0], im.size[1])
-    w, h = box[2] - box[0], box[3] - box[1]
-    if not found:
-        W, H = im.size
-        AR_MAX = 1.8
-        if max(w, h) / min(w, h) > AR_MAX:
-            c = centered_box(im, FRAME)
-            return Crop(c.box, "recadrage centré (image en bandeau)")
-        return Crop(box, "aucun bord uni — image entière")
-
-    # Si le contenu trouvé est improbable (très allongé), on préfère le centre :
-    # le recadrage des bords a pu attraper une bande de photo.
-    if max(w, h) / min(w, h) > 2.6:
-        c = centered_box(im, FRAME)
-        return Crop(c.box, f"{found.why} puis recentré (format improbable)")
-    return found
+    On ne déforme JAMAIS la photo (étirer un portrait se voit immédiatement) et
+    on ne la rogne pas : elle est simplement posée au centre, sur le gris uni
+    TEXTURE (#AEAEAE). Le CSS ajoute seulement l'ombre."""
+    fw, fh, mx, my = frame_dims(im, frame_w)
+    if im.width != fw - 2 * mx or im.height != fh - 2 * my:
+        im = im.resize((fw - 2 * mx, fh - 2 * my), Image.LANCZOS)
+    frame = Image.new("RGB", (fw, fh), TEXTURE)
+    frame.paste(im, (mx, my))
+    return frame
 
 
 # --------------------------------------------------------------------------
 # encodage
 # --------------------------------------------------------------------------
 
-def frame_photo(im: Image.Image, ratio: tuple[int, int]) -> Image.Image:
-    """Pose la photo, à ses proportions, sur un cadre au format demandé.
+def encode_sizes(src: Path, sizes: tuple[int, ...], quality: int,
+                 quality_thumb: int, dests: dict[int, Path]) -> dict[int, tuple[int, int]]:
+    """Écrit les sorties WebP d'une photo et retourne {largeur: (w, h)}.
 
-    C'est la « texture » du modèle : toutes les vignettes et toutes les grandes
-    images ont le même format, la photo est centrée avec une marge de fond
-    égale de chaque côté. On ne déforme JAMAIS la photo (étirer un portrait
-    dans un cadre 4:3 se voit immédiatement) et on ne la rogne pas non plus
-    (elle est déjà cadrée serrée) : elle est simplement posée au centre.
+    Une seule ouverture du fichier source et un seul cadre plein format, puis
+    chaque palier est rééchantillonné par ImageMagick (Lanczos, métadonnées
+    retirées). Le cadre est construit à la plus grande largeur demandée : les
+    paliers suivants n'en sont qu'une réduction, ce qui garde des marges
+    proportionnelles partout.
 
-    Le fond est le gris uni TEXTURE (#AEAEAE) ; le CSS ajoute seulement l'ombre."""
-    rw, rh = ratio
-    fw, fh = im.width, im.height
-    if fw / fh > rw / rh:  # photo trop large : le cadre gagne en hauteur
-        fh = int(round(fw * rh / rw))
-    else:  # photo trop haute : le cadre gagne en largeur
-        fw = int(round(fh * rw / rh))
-
-    frame = Image.new("RGB", (fw, fh), TEXTURE)
-    frame.paste(im, ((fw - im.width) // 2, (fh - im.height) // 2))
-    return frame
-
-
-def encode(src: Path, crop: Crop, dest: Path, width: int, quality: int,
-           max_bytes: int | None = None) -> None:
-    """Recadre (PIL) puis encode en WebP (ImageMagick : rééchantillonnage de
-    qualité, suppression des métadonnées).
-
-    Budget de poids (`max_bytes`) : quand l'image dépasse, on baisse d'abord la
-    qualité, puis — si le plancher ne suffit pas — la résolution.
-
-    Baisse de qualité d'abord : sur la photo ordinaire (papier mat, grain
-    d'argent, tirages sépia), la majeure partie du poids est du détail fin qui
-    se voit à peine ; 10 points de qualité en moins ne se voient pas sur un
-    écran, alors qu'une image plus petite se voit à l'agrandissement.
-
-    Réduction ensuite : quelques rares scans (carte à paillettes, tirage très
-    anxieux) pèsent 450 Ko à q60 — le contenu est dense et aucune qualité ne
-    les fait descendre. On les rend alors plus petits (1600 px) : ils restent
-    nets à la taille d'affichage (la grande image occupe ~1000 px de large) et
-    cessent de plomber la page."""
-    w, h = crop.size
-    ratio = FRAME
+    Budget de poids : quand un palier dépasse, on baisse d'abord la qualité
+    (10 points de moins ne se voient pas sur un écran, une image plus petite se
+    voit à l'agrandissement), puis on se contente du plancher MIN_QUALITY — la
+    largeur, elle, est fixée par le srcset et ne bouge pas.
+    """
+    biggest = max(sizes)
     tmpdir = Path(tempfile.mkdtemp(prefix="cpo-"))
+    out = {}
     try:
         im = Image.open(src)
-        im.draft("RGB", (max(2400, w), max(2400, h)))  # JPEG : décodage réduit
-        im = im.convert("RGB").crop(crop.box)
-        im = frame_photo(im, ratio)
+        im.draft("RGB", (biggest * 2, biggest * 2))  # JPEG : décodage réduit
+        im = im.convert("RGB")
+        seen = (im.width, im.height)
+        frame = frame_photo(im, biggest)
         pre = tmpdir / "pre.png"
-        im.save(pre)  # sans perte : le rééchantillonnage final est ImageMagick
-        dest.parent.mkdir(parents=True, exist_ok=True)
+        frame.save(pre)  # sans perte : le rééchantillonnage final est IM
+        fw, fh = frame.size
 
-        # paliers : (facteur sur la largeur du cadre, qualité)
-        steps = [(1.0, quality)]
-        q = quality
-        while q - 6 >= MIN_QUALITY:
-            q -= 6
-            steps.append((1.0, q))
-        for size in (0.85, 0.7):
-            steps.append((size, max(MIN_QUALITY, q)))
-
-        rw, rh = ratio
-        for scale, q in steps:
-            w_out = int(round(width * scale))
-            dims = (w_out, int(round(w_out * rh / rw)))
-            cmd = [
-                IMAGE_MAGICK, str(pre),
-                "-strip",
-                "-resize", f"{dims[0]}x{dims[1]}!",
-                "-filter", "Lanczos",
-                "-quality", str(q),
-                "-define", "webp:method=4",
-                "-define", "webp:auto-filter=true",
-                str(dest),
-            ]
-            subprocess.run(cmd, check=True, capture_output=True)
-            if max_bytes is None or dest.stat().st_size <= max_bytes:
-                return
+        for w in sizes:
+            dest = dests[w]
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            # grand côté : la largeur pour un cadre paysage, la hauteur pour un
+            # portrait (cf. WIDTHS et frame_dims).
+            if fh > fw:
+                h = w
+                out_w = max(1, round(fw * w / fh))
+            else:
+                out_w = w
+                h = max(1, round(fh * w / fw))
+            q0 = quality_thumb if w == THUMB_W else quality
+            budget = MAX_BYTES.get(w)
+            steps = [q0]
+            q = q0
+            while q - 6 >= MIN_QUALITY:
+                q -= 6
+                steps.append(q)
+            for q in steps:
+                cmd = [
+                    IMAGE_MAGICK, str(pre),
+                    "-strip",
+                    "-resize", f"{out_w}x{h}!",
+                    "-filter", "Lanczos",
+                    "-quality", str(q),
+                    "-define", "webp:method=4",
+                    "-define", "webp:auto-filter=true",
+                    str(dest),
+                ]
+                subprocess.run(cmd, check=True, capture_output=True)
+                if budget is None or dest.stat().st_size <= budget:
+                    break
+            out[w] = (out_w, h)
+        out["source"] = seen
+        return out
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
 
@@ -485,6 +328,10 @@ def collect_sources(folder: Path) -> list[Path]:
     return sorted(files, key=source_key)
 
 
+def output_paths(out_dir: Path, stem: str) -> dict[int, Path]:
+    return {w: out_dir / f"{stem}-{w}.webp" for w in WIDTHS}
+
+
 def process_collection(folder: Path, args, executor) -> dict | None:
     slug = normalize(folder.name)
     src_files = collect_sources(folder)
@@ -496,59 +343,74 @@ def process_collection(folder: Path, args, executor) -> dict | None:
     out_dir.mkdir(parents=True, exist_ok=True)
     campaign = args.campaign
 
-    jobs = []       # (index, source, thumb_dest, large_dest, crop, stale)
+    jobs = []       # (index, source, dests, stale)
     errors = []
     width = len(str(len(src_files)))
     for i, src in enumerate(src_files, start=1):
         stem = f"{slug}-{i:0{width}d}"
-        thumb = out_dir / f"{stem}-thumb.webp"
-        large = out_dir / f"{stem}-large.webp"
-        stale = (args.force or not fresh(src, thumb, campaign)
-                 or not fresh(src, large, campaign))
-        crop = None
-        if stale:
-            try:
-                im = Image.open(src)
-                im.draft("RGB", (1600, 1600))
-                im = im.convert("RGB")
-                crop = choose_crop(im)
-            except Exception as e:  # fichier illisible : on le signale, on passe
-                errors.append((src, e))
-                continue
-        jobs.append((i, src, thumb, large, crop, stale))
+        dests = output_paths(out_dir, stem)
+        stale = args.force or not all(fresh(src, d, campaign) for d in dests.values())
+        jobs.append((i, src, dests, stale))
 
     def run(job):
-        _, src, thumb, large, crop, stale = job
+        idx, src, dests, stale = job
         if not stale or args.dry_run:
             return 0
-        encode(src, crop, thumb, THUMB_W, args.quality_thumb, THUMB_MAX_BYTES)
-        encode(src, crop, large, LARGE_W, args.quality_large, LARGE_MAX_BYTES)
-        return 1
+        try:
+            encode_sizes(src, WIDTHS, args.quality_large, args.quality_thumb, dests)
+            return 1
+        except Exception as e:  # fichier illisible : on le signale, on passe
+            errors.append((src, e))
+            return 0
 
     n_done = sum(executor.map(run, jobs))
-    n_stale = sum(1 for j in jobs if j[5])
+    n_stale = sum(1 for j in jobs if j[3])
 
-    # fichiers orphelins (image supprimée du répertoire, ou renommage)
-    keep = {j[2].name for j in jobs} | {j[3].name for j in jobs}
+    # fichiers orphelins (image supprimée du répertoire, renommage, ou ancienne
+    # recette -thumb/-large)
+    keep = {d.name for j in jobs for d in j[2].values()}
+    keep.add(STAMP_NAME)
     if not args.dry_run:
         for p in out_dir.iterdir():
             if p.is_file() and p.name not in keep:
                 p.unlink()
 
     images = []
-    for i, src, thumb, large, crop, stale in jobs:
-        images.append({
-            "thumb": f"{slug}/{thumb.name}",
-            "large": f"{slug}/{large.name}",
+    skinny = []
+    for idx, src, dests, stale in jobs:
+        entry = {
             "source": src.name,
-            "aspect": aspect_of(crop, thumb),
-        })
+            "sources": [
+                {"w": w, "file": f"{slug}/{dests[w].name}"} for w in WIDTHS
+            ],
+        }
+        # largeur / hauteur réelles de la plus grande sortie : la page s'en sert
+        # pour réserver la place avant chargement (ratio variable désormais).
+        big = dests[LARGE_W]
+        try:
+            with Image.open(big) as im:
+                w, h = im.size
+            entry.update({"w": w, "h": h})
+            # raccourcis pratiques : `thumb` pour le bandeau, `large` pour le
+            # lien (l'image ouverte en grand). Le srcset se sert de `sources`.
+            entry["thumb"] = f"{slug}/{dests[THUMB_W].name}"
+            entry["large"] = f"{slug}/{big.name}"
+            if max(w, h) / min(w, h) > SKINNY_AR:
+                skinny.append(src.name)
+        except Exception:
+            entry.update({"w": LARGE_W, "h": round(LARGE_W * 3 / 4)})
+            entry["thumb"] = f"{slug}/{dests[THUMB_W].name}"
+            entry["large"] = f"{slug}/{big.name}"
+        images.append(entry)
 
     n_todo = n_stale if args.dry_run else n_done
     log(f"  {folder.name} → {slug} : {len(images)} images"
         f"{' (nouvelles : %d)' % n_todo if n_todo else ' (à jour)'}")
     for src, e in errors:
         log(f"    ! {src.name} : {e}")
+    if skinny:
+        log(f"    · images en bandeau (tout en largeur, gardées entières) : "
+            f"{', '.join(skinny[:6])}{' …' if len(skinny) > 6 else ''}")
 
     return {
         "slug": slug,
@@ -559,24 +421,15 @@ def process_collection(folder: Path, args, executor) -> dict | None:
     }
 
 
-def aspect_of(crop, dest: Path) -> str:
-    """Orientation de la sortie. Toutes les images sont maintenant dans le cadre
-    4:3 paysage ; le champ reste dans l'index parce que la page s'en sert pour
-    réserver la bonne place à l'image (largeur/hauteur) avant son chargement.
-    On lit le fichier existant quand l'image n'a pas été recalculée."""
-    try:
-        with Image.open(dest) as im:
-            return "portrait" if im.size[1] > im.size[0] else "paysage"
-    except Exception:
-        return "paysage"  # cadre 4:3 par défaut
-
-
 def recipe_stamp() -> str:
-    """Empreinte de la recette de cadre (couleur de marge, format, largeurs).
-    Écrite à la racine de static/collection/ : quand elle change — une marge
-    passée de #B4BBD8 au gris uni #AEAEAE, par exemple — toutes les images
-    déjà générées sont considérées comme périmées, sans --force manuel."""
-    return f"fond={'#%02X%02X%02X' % TEXTURE} cadre={FRAME} large={LARGE_W} thumb={THUMB_W}"
+    """Empreinte de la recette de cadre. Écrite à la racine de static/collection/ :
+    quand elle change, toutes les images déjà générées sont considérées comme
+    périmées, sans --force manuel."""
+    return (
+        f"fond={'#%02X%02X%02X' % TEXTURE} "
+        f"marges=x{MARGIN_X_RATIO}/{MARGIN_X_MIN}px,y{MARGIN_Y_RATIO}/{MARGIN_Y_MIN}px "
+        f"ratio=photo largeurs={'-'.join(map(str, WIDTHS))}"
+    )
 
 
 def stamp_state() -> tuple[str, float] | None:
@@ -719,6 +572,7 @@ def main() -> int:
             "generated": started.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "source": str(src_root),
             "total_images": sum(c["count"] for c in collections),
+            "widths": list(WIDTHS),
             "collections": collections,
         }
         payload = json.dumps(data, ensure_ascii=False, indent=1) + "\n"
