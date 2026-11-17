@@ -9,25 +9,33 @@ mortels » dans le site.
                     défaut : /home/alx/org/projects/professional/commundesmortels/répertoire/
 
 Pour chaque image source, la photo est publiée ENTIÈRE (aucun recadrage), à ses
-proportions, posée sur un cadre de gris uni #AEAEAE qui lui ajoute une marge :
+proportions, posée sur un cadre de gris uni #AEAEAE. Ce cadre est TOUJOURS au
+format 4:3 : toutes les vignettes et toutes les grandes images ont donc le même
+format, quel que soit celui des sources. La photo est réduite pour tenir dans la
+zone intérieure, puis centrée ; le gris qui reste comble la place laissée libre
+par le 4:3.
+
+Il y a donc toujours une marge grise minimale sur les quatre côtés :
 
   • gauche/droite : max(2 % de la largeur du cadre, 24 px) ;
-  • haut/bas      : max(1,5 % de la largeur de la photo, 20 px).
+  • haut/bas      : max(1,5 % de la largeur du cadre, 20 px).
 
-Le cadre suit donc le format de la photo (un portrait reste un portrait) : il
-n'est plus imposé en 4:3. L'index publie la largeur et la hauteur réelles de
-chaque sortie, ce qui permet à la page de réserver la bonne place avant
-chargement et de composer un srcset.
+Un portrait se retrouve donc collé en haut et en bas (à la marge minimale
+près), un paysage 3:2 ou 16:9 à gauche et à droite. La photo n'est jamais
+déformée ni rognée.
 
 Chaque photo est écrite en quatre largeurs WebP (srcset) :
-     <slug>/<slug>-NN-480.webp     bandeau de vignettes
-     <slug>/<slug>-NN-960.webp     mobile / petite fenêtre
-     <slug>/<slug>-NN-1440.webp    bureau
-     <slug>/<slug>-NN-2000.webp    grande image (écran HiDPI)
+     <slug>/<slug>-NN-480.webp     bandeau de vignettes  (480x360)
+     <slug>/<slug>-NN-960.webp     mobile / petite fenêtre (960x720)
+     <slug>/<slug>-NN-1440.webp    bureau (1440x1080)
+     <slug>/<slug>-NN-2000.webp    grande image (2000x1500)
 
-Le suffixe est la largeur du CADRE (photo + marges), pas celle de la photo :
-c'est la seule valeur utilisable dans un srcset, puisque le fichier est de
-cette largeur-là.
+Le suffixe est la largeur du CADRE, pas celle de la photo : c'est la seule
+valeur utilisable dans un srcset, puisque le fichier est de cette largeur-là.
+La hauteur est celle du 4:3 (largeur x 3/4).
+
+L'index publie la largeur et la hauteur réelles de chaque sortie, ce qui permet
+à la page de réserver la bonne place avant chargement.
 
 Puis écrit l'index lu par la page :
         static/collection/collections.json   (+ copie data/collection.json)
@@ -53,8 +61,11 @@ rééchantillonnage de qualité).
 Historique des recettes (cf. recipe_stamp()) :
   • 2026-11-09 → 2026-11-17 : recadrage des bords blancs/unis, cadre 4:3 fixe,
     deux sorties (-thumb 480x360, -large 2000x1500) ;
-  • depuis 2026-11-17 (retour client) : plus de recadrage, cadre au format de
-    la photo + marges grises G/D haut/bas, quatre sorties pour le srcset.
+  • 2026-11-17 (matin) : plus de recadrage, cadre au format de la photo +
+    marges grises, quatre sorties pour le srcset. Abandonné le jour même ;
+  • depuis 2026-11-17 (retour client) : plus de recadrage, cadre 4:3 imposé
+    (photo + marge = 4:3) avec une marge grise minimale sur les quatre côtés,
+    quatre sorties pour le srcset.
 """
 
 from __future__ import annotations
@@ -90,30 +101,32 @@ STAMP_NAME = "recette.txt"
 # static/collection/.
 DATA_INDEX = ROOT / "data" / "collection.json"
 
-# Largeurs du srcset, en largeur de CADRE pour les photos paysage et carrées.
-#
-# ATTENTION : pour un portrait, la valeur est le GRAND côté (la hauteur), pas la
-# largeur. Le cadre suit le format de la photo depuis le 2026-11-17 : un
-# portrait en 2000 px de large ferait 3200 px de haut, soit 6,3 Mpx pour une
-# photo qui en occupe 1,1 — trois fois le poids de l'ancien cadre 4:3, pour un
-# détail que personne ne voit. En bornant le GRAND côté, « 2000 » veut dire la
-# même chose dans les deux sens : 2000 px de haut pour un portrait, 2000 px de
-# large pour un paysage.
+# Largeurs du srcset. Le cadre est toujours en 4:3 (FRAME) : chaque palier
+# désigne la LARGEUR du cadre, la hauteur en découle (480x360, 960x720,
+# 1440x1080, 2000x1500). Plus d'ambiguïté portrait/paysage : le cadre a le même
+# format pour toutes les photos, c'est la photo dedans qui change de forme.
 WIDTHS = (480, 960, 1440, 2000)
 THUMB_W = WIDTHS[0]
 LARGE_W = WIDTHS[-1]
 
+# Format du cadre — 4:3 paysage, imposé à toutes les sorties (retour client
+# 2026-11-17 : « photo+margin should have 4:3 aspect ratio »). Une photo
+# portrait est posée debout au centre, entourée de gris ; un paysage 3:2 garde
+# une marge en haut et en bas. La photo n'est jamais déformée ni rognée.
+FRAME = (4, 3)
+
 # Marges du cadre — gris neutre uni #AEAEAE (retour client 2026-11-12 : « margin
-# color should be #aeaeae »). Les marges sont calculées sur la largeur du cadre
-# et converties en pixels entiers ; elles sont donc plus épaisses en valeur
-# absolue sur la grande image que sur la vignette, à proportion égale.
-# Retour client 2026-11-17 : « add small top/bottom margins », d'où le
-# supplément vertical qui n'existait pas avant (le cadre 4:3 collait la photo
-# en haut et en bas dès qu'elle était en paysage).
+# color should be #aeaeae »).
+#
+# Elles sont calculées sur la largeur du CADRE, pas sur celle de la photo : la
+# marge intérieure est donc la même pour toutes les photos, quel que soit leur
+# format, et il reste toujours au moins cette bande de gris sur les quatre
+# côtés (retour client 2026-11-17 : « add small top/bottom margins »). Le
+# reste du gris vient de la place laissée libre par le format 4:3.
 TEXTURE = (174, 174, 174)  # #AEAEAE
 MARGIN_X_RATIO = 0.02   # 2 % de la largeur du cadre, de chaque côté
 MARGIN_X_MIN = 24       # plancher en pixels, sur la plus grande sortie
-MARGIN_Y_RATIO = 0.015  # 1,5 % de la largeur de la photo, en haut et en bas
+MARGIN_Y_RATIO = 0.015  # 1,5 % de la largeur du cadre, en haut et en bas
 MARGIN_Y_MIN = 20       # plancher en pixels, sur la plus grande sortie
 
 MIN_QUALITY = 60   # plancher de la qualité adaptative
@@ -186,56 +199,60 @@ def source_key(path: Path) -> tuple:
 # Ce qui reste à calculer, c'est le cadre : la taille de sortie pour une
 # largeur de cadre donnée, et la position de la photo dedans.
 
-def margin_px(frame_w: int, photo_w_ratio: float) -> tuple[int, int]:
-    """Marges (x, y) en pixels pour un cadre de largeur `frame_w`.
+def margin_px(frame_w: int) -> tuple[int, int]:
+    """Marges minimales (x, y) en pixels pour un cadre de largeur `frame_w`.
 
     Les planchers (MARGIN_X_MIN, MARGIN_Y_MIN) sont donnés pour la plus grande
     sortie et passent à l'échelle en dessous, sinon les marges d'une vignette
     de 480 px mangeraient un dixième de l'image."""
     scale = frame_w / LARGE_W
     mx = max(round(MARGIN_X_RATIO * frame_w), round(MARGIN_X_MIN * scale)) or 1
-    my = max(round(MARGIN_Y_RATIO * frame_w * photo_w_ratio),
-             round(MARGIN_Y_MIN * scale)) or 1
+    my = max(round(MARGIN_Y_RATIO * frame_w), round(MARGIN_Y_MIN * scale)) or 1
     return mx, my
 
 
-def frame_dims(im: Image.Image, frame_w: int) -> tuple[int, int, int, int]:
-    """Dimensions du cadre et marges pour une photo, au grand côté demandé.
+def frame_dims(im: Image.Image, frame_w: int) -> tuple[int, int, int, int, int]:
+    """Dimensions du cadre, taille de la photo et marges réelles.
 
-    Retourne (largeur, hauteur, marge_x, marge_y). La photo garde ses
-    proportions exactes ; le cadre est la photo + les marges. Le format du
-    cadre suit donc celui de la photo.
+    Retourne (cadre_w, cadre_h, photo_w, photo_h, marge_min).
 
-    `frame_w` est le GRAND côté du cadre : la largeur pour un paysage, la
-    hauteur pour un portrait (cf. WIDTHS). C'est ce qui garde un poids
-    comparable entre les deux orientations."""
-    photo_ratio = im.height / im.width
-    is_portrait = photo_ratio > 1
-    # largeur nominale du cadre : pour un portrait, on la déduit de la hauteur
-    # voulue, une fois les marges connues (elles sont proportionnelles, on les
-    # estime sur la largeur nominale puis on les recalcule).
-    frame_w = frame_w
-    if is_portrait:
-        mx, my = margin_px(frame_w, photo_ratio)
-        photo_h = frame_w - 2 * my
-        frame_w = max(WIDTHS[0], round(photo_h / photo_ratio) + 2 * mx)
-    mx, my = margin_px(frame_w, photo_ratio)
-    photo_w = frame_w - 2 * mx
-    photo_h = max(1, round(photo_w * photo_ratio))
-    return frame_w, photo_h + 2 * my, mx, my
+    Le cadre est TOUJOURS au format FRAME (4:3) : sa hauteur ne dépend que de
+    sa largeur. La photo est réduite à ses proportions pour tenir dans la zone
+    intérieure (cadre moins les marges minimales) ; le gris qui reste est
+    réparti également de chaque côté. Une photo portrait est donc collée en
+    haut et en bas (à la marge minimale près), un paysage 3:2 ou 16:9 l'est à
+    gauche et à droite.
+
+    `im` ne sert qu'à connaître les proportions de la photo source."""
+    rw, rh = FRAME
+    frame_h = max(1, round(frame_w * rh / rw))
+    mx, my = margin_px(frame_w)
+    inner_w, inner_h = frame_w - 2 * mx, frame_h - 2 * my
+    photo_ratio = im.height / im.width          # hauteur / largeur
+    if inner_w / inner_h > 1 / photo_ratio:
+        # place libre plus large que la photo : c'est la hauteur qui contraint
+        photo_h = inner_h
+        photo_w = max(1, round(inner_h / photo_ratio))
+    else:
+        # place libre plus étroite : c'est la largeur qui contraint
+        photo_w = inner_w
+        photo_h = max(1, round(inner_w * photo_ratio))
+    return frame_w, frame_h, photo_w, photo_h, (mx, my)
 
 
 def frame_photo(im: Image.Image, frame_w: int) -> Image.Image:
-    """Pose la photo, à ses proportions, au centre d'un cadre gris.
+    """Pose la photo, à ses proportions, au centre d'un cadre 4:3 gris.
 
     On ne déforme JAMAIS la photo (étirer un portrait se voit immédiatement) et
     on ne la rogne pas : elle est simplement posée au centre, sur le gris uni
-    TEXTURE (#AEAEAE). Le CSS ajoute seulement l'ombre."""
-    fw, fh, mx, my = frame_dims(im, frame_w)
-    if im.width != fw - 2 * mx or im.height != fh - 2 * my:
-        im = im.resize((fw - 2 * mx, fh - 2 * my), Image.LANCZOS)
+    TEXTURE (#AEAEAE). Le cadre, lui, est toujours en 4:3 : toutes les vignettes
+    et toutes les grandes images ont donc le même format, et la page peut
+    réserver leur place sans sauter. Le CSS ajoute seulement l'ombre."""
+    fw, fh, pw, ph, _ = frame_dims(im, frame_w)
+    if im.size != (pw, ph):
+        im = im.resize((pw, ph), Image.LANCZOS)
     frame = Image.new("RGB", (fw, fh), TEXTURE)
-    frame.paste(im, (mx, my))
+    frame.paste(im, ((fw - pw) // 2, (fh - ph) // 2))
     return frame
 
 
@@ -259,6 +276,7 @@ def encode_sizes(src: Path, sizes: tuple[int, ...], quality: int,
     largeur, elle, est fixée par le srcset et ne bouge pas.
     """
     biggest = max(sizes)
+    rw, rh = FRAME
     tmpdir = Path(tempfile.mkdtemp(prefix="cpo-"))
     out = {}
     try:
@@ -274,14 +292,9 @@ def encode_sizes(src: Path, sizes: tuple[int, ...], quality: int,
         for w in sizes:
             dest = dests[w]
             dest.parent.mkdir(parents=True, exist_ok=True)
-            # grand côté : la largeur pour un cadre paysage, la hauteur pour un
-            # portrait (cf. WIDTHS et frame_dims).
-            if fh > fw:
-                h = w
-                out_w = max(1, round(fw * w / fh))
-            else:
-                out_w = w
-                h = max(1, round(fh * w / fw))
+            # le cadre est en 4:3 : la hauteur découle de la largeur, toujours.
+            h = max(1, round(w * rh / rw))
+            out_w = w
             q0 = quality_thumb if w == THUMB_W else quality
             budget = MAX_BYTES.get(w)
             steps = [q0]
@@ -427,8 +440,9 @@ def recipe_stamp() -> str:
     périmées, sans --force manuel."""
     return (
         f"fond={'#%02X%02X%02X' % TEXTURE} "
+        f"cadre={FRAME[0]}:{FRAME[1]} "
         f"marges=x{MARGIN_X_RATIO}/{MARGIN_X_MIN}px,y{MARGIN_Y_RATIO}/{MARGIN_Y_MIN}px "
-        f"ratio=photo largeurs={'-'.join(map(str, WIDTHS))}"
+        f"largeurs={'-'.join(map(str, WIDTHS))}"
     )
 
 
