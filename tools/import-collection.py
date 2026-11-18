@@ -83,7 +83,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 ROOT = Path(__file__).resolve().parent.parent  # website-draft/
 # Source de vérité UNIQUE du répertoire (décision client 2026-11-17).
@@ -282,6 +282,14 @@ def encode_sizes(src: Path, sizes: tuple[int, ...], quality: int,
     try:
         im = Image.open(src)
         im.draft("RGB", (biggest * 2, biggest * 2))  # JPEG : décodage réduit
+        # Orientation EXIF : un appareil photo / téléphone écrit souvent la
+        # photo couchée dans le fichier et note la rotation à faire dans
+        # l'EXIF (orientation 6 = 90° horaire, 8 = 90° antihoraire). Les
+        # pixels bruts sont alors de travers : les publier tels quels donne
+        # une photo tournée, d'autant plus invisible qu'on retire l'EXIF à
+        # l'encodage (-strip) — plus rien ne dit au navigateur de la
+        # redresser. On applique donc la rotation AVANT tout le reste.
+        im = ImageOps.exif_transpose(im)
         im = im.convert("RGB")
         seen = (im.width, im.height)
         frame = frame_photo(im, biggest)
@@ -442,7 +450,8 @@ def recipe_stamp() -> str:
         f"fond={'#%02X%02X%02X' % TEXTURE} "
         f"cadre={FRAME[0]}:{FRAME[1]} "
         f"marges=x{MARGIN_X_RATIO}/{MARGIN_X_MIN}px,y{MARGIN_Y_RATIO}/{MARGIN_Y_MIN}px "
-        f"largeurs={'-'.join(map(str, WIDTHS))}"
+        f"largeurs={'-'.join(map(str, WIDTHS))} "
+        f"orientation=exif"
     )
 
 
